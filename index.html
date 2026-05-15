@@ -965,7 +965,7 @@
     }));
 
     const state = {
-      stores: ['全部门店'],
+      stores: [...storeCatalog],
       ruleIds: [...allRuleIds],
       ruleName: '全部规则',
       threshold: '全部阈值',
@@ -1002,8 +1002,7 @@
     }
 
     function getSelectedStores() {
-      if (state.stores.includes('全部门店')) return [];
-      return state.stores;
+      return state.stores.length === storeCatalog.length ? [] : state.stores;
     }
 
     function inDateRange(item) {
@@ -1133,11 +1132,12 @@
 
     function syncStoreChip() {
       const chip = $('#storeChip');
-      if (state.stores.includes('全部门店') || state.stores.length === 0) {
+      if (state.stores.length === storeCatalog.length) {
         chip.textContent = '全部门店';
-        state.stores = ['全部门店'];
       } else if (state.stores.length === 1) {
         chip.textContent = state.stores[0];
+      } else if (state.stores.length === 0) {
+        chip.textContent = '未选择门店';
       } else {
         chip.textContent = `已选 ${state.stores.length} 个门店`;
       }
@@ -1157,8 +1157,17 @@
     function renderStoreOptions() {
       $('#storeOptions').innerHTML = [
         `<label class="option"><input type="checkbox" value="全部门店" checked /><span>全部门店</span></label>`,
-        ...storeCatalog.map(store => `<label class="option"><input type="checkbox" value="${escapeHtml(store)}" /><span>${escapeHtml(store)}</span></label>`)
+        ...storeCatalog.map(store => `<label class="option"><input type="checkbox" value="${escapeHtml(store)}" checked /><span>${escapeHtml(store)}</span></label>`)
       ].join('');
+    }
+
+    function syncStoreCheckboxes() {
+      const selected = new Set(state.stores);
+      const isAllSelected = state.stores.length === storeCatalog.length;
+      $$('#storeDropdown input[type="checkbox"]').forEach(input => {
+        input.checked = input.value === '全部门店' ? isAllSelected : selected.has(input.value);
+      });
+      syncStoreChip();
     }
 
     function renderRuleIdOptions() {
@@ -1227,16 +1236,15 @@
 
       $$('#storeDropdown input[type="checkbox"]').forEach(input => {
         input.addEventListener('change', () => {
-          const allInput = $('#storeDropdown input[value="全部门店"]');
-          if (input.value === '全部门店' && input.checked) {
-            $$('#storeDropdown input[type="checkbox"]').forEach(item => item.checked = item.value === '全部门店');
-          } else if (input.value !== '全部门店' && input.checked) {
-            allInput.checked = false;
+          if (input.value === '全部门店') {
+            state.stores = input.checked ? [...storeCatalog] : [];
+          } else {
+            const selected = new Set(state.stores);
+            if (input.checked) selected.add(input.value);
+            else selected.delete(input.value);
+            state.stores = storeCatalog.filter(store => selected.has(store));
           }
-          const checked = $$('#storeDropdown input[type="checkbox"]:checked').map(item => item.value);
-          state.stores = checked.length ? checked : ['全部门店'];
-          if (checked.length === 0) allInput.checked = true;
-          syncStoreChip();
+          syncStoreCheckboxes();
         });
       });
 
@@ -1313,9 +1321,8 @@
       $('#resetBtn').addEventListener('click', () => {
         $('#startDate').value = '2026-05-01';
         $('#endDate').value = '2026-05-14';
-        $$('#storeDropdown input[type="checkbox"]').forEach(item => item.checked = item.value === '全部门店');
         Object.assign(state, {
-          stores: ['全部门店'],
+          stores: [...storeCatalog],
           ruleIds: [...allRuleIds],
           ruleName: '全部规则',
           threshold: '全部阈值',
@@ -1346,7 +1353,7 @@
     renderRuleIdOptions();
     updateRuleSelectOptions();
     bindEvents();
-    syncStoreChip();
+    syncStoreCheckboxes();
     syncRuleIdChip();
     render();
   </script>
