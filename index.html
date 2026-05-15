@@ -203,9 +203,7 @@
       box-shadow: 0 0 0 4px rgba(38, 162, 105, 0.12);
     }
 
-    .page {
-      padding: 16px 18px 28px;
-    }
+    .page { padding: 16px 18px 28px; }
 
     .filter-card,
     .panel,
@@ -223,7 +221,7 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: 1.2fr 1.4fr 1fr 1fr auto;
+      grid-template-columns: 1.1fr 1.35fr 1.2fr 1.35fr 1.25fr auto;
       gap: 14px 18px;
       align-items: end;
     }
@@ -248,6 +246,9 @@
       align-items: center;
       justify-content: space-between;
       transition: border-color 0.16s, box-shadow 0.16s;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
     }
 
     .input:focus-within,
@@ -269,15 +270,7 @@
       text-align: center;
     }
 
-    .date-input {
-      width: 100%;
-      font-family: inherit;
-      outline: none;
-    }
-
-    .dropdown {
-      position: relative;
-    }
+    .dropdown { position: relative; }
 
     .dropdown-trigger {
       min-height: 36px;
@@ -298,7 +291,7 @@
       border: 1px solid #b9d9ff;
       border-radius: 12px;
       font-size: 12px;
-      max-width: 136px;
+      max-width: 168px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -323,7 +316,9 @@
       left: 0;
       top: calc(100% + 6px);
       width: 100%;
-      min-width: 260px;
+      min-width: 320px;
+      max-height: 360px;
+      overflow: auto;
       background: #fff;
       border: 1px solid #dfe6f1;
       border-radius: 8px;
@@ -345,18 +340,20 @@
     }
 
     .option {
-      height: 34px;
+      min-height: 34px;
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 0 8px;
+      padding: 6px 8px;
       border-radius: 5px;
       cursor: pointer;
+      line-height: 20px;
     }
 
     .option:hover { background: #f3f8ff; }
-
-    .option input { accent-color: var(--primary); }
+    .option input { accent-color: var(--primary); flex: none; }
+    .option-text { display: inline-flex; flex-direction: column; gap: 2px; }
+    .option-sub { color: #7a8ba0; font-size: 12px; }
 
     .btn-group {
       display: flex;
@@ -374,6 +371,7 @@
       cursor: pointer;
       font-family: inherit;
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .btn.primary {
@@ -487,13 +485,14 @@
     .tab-panel.active { display: block; }
 
     .panel-header {
-      height: 46px;
+      min-height: 46px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 14px;
+      padding: 8px 14px;
       border-bottom: 1px solid #e6ebf3;
       background: #fbfcff;
+      gap: 18px;
     }
 
     .panel-title {
@@ -503,6 +502,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      white-space: nowrap;
     }
 
     .panel-title::before {
@@ -517,19 +517,20 @@
     .panel-tip {
       color: #7a8ba0;
       font-size: 13px;
+      text-align: right;
     }
 
     .table-wrap {
       overflow: auto;
-      max-height: calc(100vh - 360px);
-      min-height: 300px;
+      max-height: calc(100vh - 370px);
+      min-height: 310px;
     }
 
     table {
       border-collapse: separate;
       border-spacing: 0;
       width: 100%;
-      min-width: 1200px;
+      min-width: 1450px;
     }
 
     th,
@@ -552,11 +553,6 @@
       user-select: none;
     }
 
-    th.sortable { cursor: pointer; }
-    th.sortable::after { content: " ⇅"; color: #94a3b8; font-weight: 400; }
-    th.sorted-asc::after { content: " ↑"; color: var(--primary); }
-    th.sorted-desc::after { content: " ↓"; color: var(--primary); }
-
     tbody tr:nth-child(even) { background: #fbfcff; }
     tbody tr:hover { background: #eaf4ff; }
     tbody tr.selected {
@@ -566,6 +562,7 @@
 
     .num { text-align: right; font-variant-numeric: tabular-nums; }
     .center { text-align: center; }
+    .wide-text { max-width: 360px; overflow: hidden; text-overflow: ellipsis; }
 
     .tag {
       display: inline-block;
@@ -652,8 +649,8 @@
 
     .toast.show { display: flex; }
 
-    @media (max-width: 1320px) {
-      .filter-grid { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+    @media (max-width: 1500px) {
+      .filter-grid { grid-template-columns: repeat(3, minmax(260px, 1fr)); }
       .metrics { grid-template-columns: repeat(2, 1fr); }
       .brand { min-width: 240px; }
       .nav-item { min-width: 100px; padding: 0 12px; }
@@ -705,7 +702,7 @@
     <section class="filter-card">
       <div class="filter-grid">
         <div class="field">
-          <label>日期范围</label>
+          <label>销售日期</label>
           <div class="date-range">
             <input class="date-input" id="startDate" type="date" value="2026-05-01" />
             <span>至</span>
@@ -720,36 +717,33 @@
             <span class="select-placeholder">下拉多选</span>
             <span class="select-arrow">⌄</span>
           </div>
-          <div class="dropdown-menu">
+          <div class="dropdown-menu" id="storeMenu">
             <input class="option-search" id="storeSearch" placeholder="搜索门店" />
-            <label class="option"><input type="checkbox" value="全部门店" checked />全部门店</label>
-            <label class="option"><input type="checkbox" value="北京首都机场T3店" />北京首都机场T3店</label>
-            <label class="option"><input type="checkbox" value="上海浦东机场店" />上海浦东机场店</label>
-            <label class="option"><input type="checkbox" value="广州白云机场店" />广州白云机场店</label>
-            <label class="option"><input type="checkbox" value="三亚国际免税城A区店" />三亚国际免税城A区店</label>
+            <div id="storeOptions"></div>
+          </div>
+        </div>
+
+        <div class="field dropdown" id="ruleIdDropdown">
+          <label>规则ID</label>
+          <div class="select dropdown-trigger" id="ruleIdTrigger">
+            <span class="chip" id="ruleIdChip">全部规则ID</span>
+            <span class="select-placeholder">下拉多选</span>
+            <span class="select-arrow">⌄</span>
+          </div>
+          <div class="dropdown-menu" id="ruleIdMenu">
+            <input class="option-search" id="ruleIdSearch" placeholder="搜索规则ID/规则名称" />
+            <div id="ruleIdOptions"></div>
           </div>
         </div>
 
         <div class="field">
-          <label>规则</label>
-          <select class="select" id="ruleSelect">
-            <option value="全部规则">全部规则</option>
-            <option value="单笔销售金额低于规模阈值">单笔销售金额低于规模阈值</option>
-            <option value="同一会员日内多笔低额消费">同一会员日内多笔低额消费</option>
-            <option value="重点品类销售低于规则阈值">重点品类销售低于规则阈值</option>
-            <option value="门店日销售低于规模阈值">门店日销售低于规模阈值</option>
-          </select>
+          <label>规则名称</label>
+          <select class="select" id="ruleSelect"></select>
         </div>
 
         <div class="field">
           <label>阈值</label>
-          <select class="select" id="thresholdSelect">
-            <option value="全部阈值">全部阈值</option>
-            <option value="实付金额 < 100元">实付金额 &lt; 100元</option>
-            <option value="低额订单 ≥ 5笔/日">低额订单 ≥ 5笔/日</option>
-            <option value="重点品类数量 < 3件">重点品类数量 &lt; 3件</option>
-            <option value="日销售额 < 30,000元">日销售额 &lt; 30,000元</option>
-          </select>
+          <select class="select" id="thresholdSelect"></select>
         </div>
 
         <div class="btn-group">
@@ -762,52 +756,54 @@
     <section class="metrics">
       <div class="metric-card">
         <div class="metric-label">命中门店数</div>
-        <div class="metric-value" id="storeMetric">4</div>
-        <div class="metric-extra">较昨日 <strong>+1</strong></div>
+        <div class="metric-value" id="storeMetric">0</div>
+        <div class="metric-extra">当前筛选范围内门店</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">命中规则数</div>
-        <div class="metric-value" id="ruleMetric">4</div>
+        <div class="metric-value" id="ruleMetric">0</div>
         <div class="metric-extra">覆盖规模以下销售规则</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">命中笔数</div>
-        <div class="metric-value" id="hitMetric">38</div>
+        <div class="metric-value" id="hitMetric">0</div>
         <div class="metric-extra">当前筛选范围内汇总</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">风险销售金额</div>
-        <div class="metric-value" id="amountMetric">31,170</div>
+        <div class="metric-value" id="amountMetric">0</div>
         <div class="metric-extra">单位：元</div>
       </div>
     </section>
 
     <section class="panel report-panel">
       <div class="inner-tabs">
-        <div class="inner-tab active" data-tab="summaryPanel">汇总值 <span class="badge" id="summaryBadge">4</span></div>
-        <div class="inner-tab" data-tab="detailPanel">明细 <span class="badge" id="detailBadge">8</span></div>
+        <div class="inner-tab active" data-tab="summaryPanel">汇总值 <span class="badge" id="summaryBadge">0</span></div>
+        <div class="inner-tab" data-tab="detailPanel">明细 <span class="badge" id="detailBadge">0</span></div>
       </div>
 
       <div class="tab-panel active" id="summaryPanel">
         <div class="panel-header">
           <div class="panel-title">销售业务合规风险（规模以下）汇总值</div>
-          <div class="panel-tip">按“门店 + 规则 + 阈值”汇总，点击行可切换到对应明细</div>
+          <div class="panel-tip">按“门店 + 规则ID + 规则名称 + 阈值”汇总，点击行可切换到对应明细</div>
         </div>
         <div class="table-wrap">
           <table id="summaryTable">
             <thead>
               <tr>
                 <th style="width: 60px;" class="center">序号</th>
-                <th class="sortable" data-key="date">业务日期</th>
-                <th class="sortable" data-key="store">门店</th>
-                <th class="sortable" data-key="rule">规则</th>
-                <th class="sortable" data-key="threshold">阈值</th>
-                <th class="num sortable" data-key="hits">命中笔数</th>
-                <th class="num sortable" data-key="members">涉及会员数</th>
-                <th class="num sortable" data-key="items">涉及商品数</th>
-                <th class="num sortable" data-key="amount">风险销售金额</th>
+                <th>销售日期</th>
+                <th>门店</th>
+                <th>规则ID</th>
+                <th>规则名称</th>
+                <th>规则内容</th>
+                <th>阈值</th>
+                <th>汇总值</th>
+                <th class="num">命中笔数</th>
+                <th class="num">涉及会员数</th>
+                <th class="num">涉及商品数</th>
+                <th class="num">风险销售金额</th>
                 <th>风险等级</th>
-                <th class="sortable" data-key="lastTime">最近触发时间</th>
               </tr>
             </thead>
             <tbody id="summaryBody"></tbody>
@@ -830,21 +826,21 @@
             <thead>
               <tr>
                 <th style="width: 60px;" class="center">序号</th>
-                <th class="sortable" data-key="date">业务日期</th>
-                <th class="sortable" data-key="time">销售时间</th>
+                <th>销售日期</th>
+                <th>销售时间</th>
                 <th>门店编码</th>
-                <th class="sortable" data-key="store">门店名称</th>
+                <th>门店名称</th>
+                <th>规则ID</th>
+                <th>规则名称</th>
                 <th>单据号</th>
                 <th>POS机号</th>
                 <th>收银员</th>
-                <th>会员编号</th>
+                <th>证件号</th>
                 <th>商品编码</th>
                 <th>商品名称</th>
-                <th>品类</th>
-                <th class="num sortable" data-key="qty">销售数量</th>
-                <th class="num sortable" data-key="saleAmount">销售金额</th>
-                <th class="num sortable" data-key="paidAmount">实付金额</th>
-                <th class="sortable" data-key="rule">规则</th>
+                <th>支付方式</th>
+                <th class="num">销售金额</th>
+                <th class="num">实付金额</th>
                 <th>阈值</th>
                 <th>实际值</th>
                 <th>偏离值</th>
@@ -858,7 +854,7 @@
         </div>
         <div class="footer-row">
           <div id="detailFooter">共 0 条明细记录</div>
-          <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">2</span><span class="page-btn">3</span><span class="page-btn">›</span></div>
+          <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">2</span><span class="page-btn">›</span></div>
         </div>
       </div>
     </section>
@@ -867,46 +863,142 @@
   <div class="toast" id="toast"><span>✓</span><span id="toastText">操作成功</span></div>
 
   <script>
-    const summaryData = [
-      { id: 1, date: '2026-05-14', store: '北京首都机场T3店', rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', hits: 18, members: 15, items: 11, amount: 1320, level: '中风险', lastTime: '2026-05-14 21:36:18' },
-      { id: 2, date: '2026-05-14', store: '上海浦东机场店', rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', hits: 7, members: 2, items: 6, amount: 860, level: '高风险', lastTime: '2026-05-14 19:08:42' },
-      { id: 3, date: '2026-05-14', store: '广州白云机场店', rule: '重点品类销售低于规则阈值', threshold: '重点品类数量 < 3件', hits: 12, members: 10, items: 4, amount: 2410, level: '低风险', lastTime: '2026-05-14 17:26:09' },
-      { id: 4, date: '2026-05-14', store: '三亚国际免税城A区店', rule: '门店日销售低于规模阈值', threshold: '日销售额 < 30,000元', hits: 1, members: 36, items: 42, amount: 26580, level: '中风险', lastTime: '2026-05-14 22:10:55' },
-      { id: 5, date: '2026-05-13', store: '北京首都机场T3店', rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', hits: 5, members: 1, items: 5, amount: 490, level: '高风险', lastTime: '2026-05-13 20:18:20' }
+    const storeCatalog = [
+      '[0818]海南海航中免免税品有限公司_美兰机场店',
+      '[0819]海南海航中免免税品有限公司_三亚机场店',
+      '[6118]西安咸阳国际机场免税品有限公司',
+      '[6610]中国免税品（集团）有限责任公司大连分公司',
+      '[6702]黑河市中免免税店有限责任公司',
+      '[6743]满洲里中免免税品有限责任公司',
+      '[6764]湖南中免免税品有限责任公司',
+      '[6791]厦门东免免税品有限公司',
+      '[6810]乌鲁木齐市中免免税品有限责任公司',
+      '[6826]广州新免免税品有限公司',
+      '[6842]中免集团杭州免税品有限责任公司',
+      '[6850]青岛新免免税品有限责任公司',
+      '[6851]中免集团沈阳免税品商贸有限责任公司',
+      '[6852]中免集团昆明机场免税品有限公司',
+      '[6853]上海港中免免税品有限公司',
+      '[6912]中免集团（武汉）机场免税品有限公司',
+      '[7020]中免成都天府机场免税品有限公司',
+      '[7057]中免(杭州)免税品有限公司',
+      '[7058]中免（天津）商贸有限公司',
+      '[7062]中免国免（大连）免税商品销售有限公司',
+      '[7084]广州市内免税店',
+      '[7098]西安咸阳国际机场免税品有限公司西安分公司',
+      '[7188]中免白云机场免税品(广州)有限公司',
+      '[7222]中免集团（北京）免税品有限公司'
     ];
 
-    const detailData = [
-      { date: '2026-05-14', time: '10:23:15', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140001', pos: 'POS-03', cashier: '王某', member: 'M00129', sku: 'SKU100238', product: '香化商品A', category: '香化', qty: 1, saleAmount: 88, paidAmount: 68, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '68元', deviation: '-32元', level: '中风险', desc: '单笔实付金额低于规模阈值' },
-      { date: '2026-05-14', time: '11:05:42', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140078', pos: 'POS-08', cashier: '李某', member: 'M00887', sku: 'SKU330876', product: '食品商品B', category: '食品', qty: 1, saleAmount: 95, paidAmount: 95, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '95元', deviation: '-5元', level: '低风险', desc: '单笔实付金额接近阈值下限' },
-      { date: '2026-05-14', time: '14:18:09', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140321', pos: 'POS-01', cashier: '赵某', member: 'M00256', sku: 'SKU220541', product: '精品商品C', category: '精品', qty: 1, saleAmount: 120, paidAmount: 72, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '72元', deviation: '-28元', level: '中风险', desc: '折扣后实付金额低于规模阈值' },
-      { date: '2026-05-14', time: '21:36:18', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140886', pos: 'POS-05', cashier: '陈某', member: 'M00918', sku: 'SKU778212', product: '香化商品D', category: '香化', qty: 1, saleAmount: 99, paidAmount: 99, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '99元', deviation: '-1元', level: '低风险', desc: '单笔实付金额低于阈值' },
-      { date: '2026-05-14', time: '19:08:42', code: 'SH-PD-002', store: '上海浦东机场店', receipt: 'XS202605140712', pos: 'POS-06', cashier: '周某', member: 'M00666', sku: 'SKU120088', product: '食品商品E', category: '食品', qty: 1, saleAmount: 86, paidAmount: 86, rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', actual: '6笔', deviation: '+1笔', level: '高风险', desc: '同一会员当日多次低额消费' },
-      { date: '2026-05-14', time: '17:26:09', code: 'GZ-BY-003', store: '广州白云机场店', receipt: 'XS202605140603', pos: 'POS-02', cashier: '吴某', member: 'M00321', sku: 'SKU908711', product: '重点品类商品F', category: '重点品类', qty: 2, saleAmount: 210, paidAmount: 210, rule: '重点品类销售低于规则阈值', threshold: '重点品类数量 < 3件', actual: '2件', deviation: '-1件', level: '低风险', desc: '重点品类销售数量低于规则阈值' },
-      { date: '2026-05-14', time: '22:10:55', code: 'SY-A-004', store: '三亚国际免税城A区店', receipt: 'DAY20260514001', pos: '-', cashier: '-', member: '-', sku: '-', product: '门店日销售汇总', category: '全品类', qty: 42, saleAmount: 26580, paidAmount: 26580, rule: '门店日销售低于规模阈值', threshold: '日销售额 < 30,000元', actual: '26,580元', deviation: '-3,420元', level: '中风险', desc: '门店日销售额低于规模阈值' },
-      { date: '2026-05-13', time: '20:18:20', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605130488', pos: 'POS-04', cashier: '刘某', member: 'M00129', sku: 'SKU300287', product: '食品商品G', category: '食品', qty: 1, saleAmount: 98, paidAmount: 98, rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', actual: '5笔', deviation: '0笔', level: '高风险', desc: '同一会员达到日内低额订单阈值' }
+    const ruleCatalog = [
+      { id: 'C01', name: '同一证件高频购买', content: '同一证件号30天内购买相同商品编码次数≥3次，或单日订单数≥5笔', threshold: '次数阈值：3次/30天；单日订单阈值：5笔', level: '中风险' },
+      { id: 'C02', name: '护照、身份信息相同，顾客姓名不同', content: '30天内，同一护照身份信息存在不同顾客姓名，≥2笔', threshold: '次数阈值：≥2次/30天', level: '中低风险' },
+      { id: 'C03', name: '航班信息异常', content: '同一旅客连续离境/入境购物时间存在逻辑错误，两笔订单间隔购买时间≥6小时且≤48小时', threshold: '次数阈值：≥1次/30天', level: '高风险' },
+      { id: 'C04', name: '支付人与证件人不一致', content: '同一支付账号为≥3个不同证件号的订单付款，时间阈值为30天', threshold: '证件数阈值：3个', level: '高风险' },
+      { id: 'C05', name: '大额现金结算', content: '单笔订单现金支付金额≥5000元，或同一收银员日现金结算笔数占比＞30%', threshold: '单笔阈值：5000元；现金占比阈值：30%', level: '中风险' },
+      { id: 'C06', name: '退货频率异常（笔数）', content: '统计数据月份的总退货笔数≥倒退一年内的月平均退货笔数*1.25', threshold: '比例阀值：5%', level: '中风险' },
+      { id: 'C07', name: '退货频率异常（金额）', content: '统计数据月份的总退货金额≥倒退一年内的月平均退货金额*1.05', threshold: '比例阀值：5%', level: '中风险' },
+      { id: 'C08', name: '低于成本销售', content: '交易价格＜含税成本', threshold: '交易价格<含税成本', level: '中风险' },
+      { id: 'C09', name: '临时折扣超权限', content: '临时折扣/售价 大于等于 25%', threshold: '折扣率阈值：25%', level: '中风险' },
+      { id: 'C10', name: '提货（寄存）人与购买人不一致', content: '提货人证件号 ≠ 订单购买人证件号', threshold: '不一致即预警', level: '中高风险' },
+      { id: 'C11', name: '集中提货（寄存）', content: '同一提货人1小时内提货订单数≥3笔', threshold: '订单数阈值：3笔/小时', level: '中风险' },
+      { id: 'L01', name: '代购团伙识别', content: '多个购买人证件（≥3）由同一支付账号付款，且这些订单的提货人集中在30分钟内由同一人签字提货', threshold: '证件数≥3，提货时间窗口30分钟', level: '高风险' }
     ];
+
+    const summaryProfiles = [
+      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01', actual: '同证件30天同商品4次，单日订单6笔', hits: 18, members: 6, items: 8, amount: 28680 },
+      { date: '2026-05-14', store: storeCatalog[1], ruleId: 'C02', actual: '同护照信息对应3个顾客姓名', hits: 3, members: 3, items: 4, amount: 7640 },
+      { date: '2026-05-14', store: storeCatalog[2], ruleId: 'C03', actual: '两笔订单间隔8小时20分钟', hits: 2, members: 2, items: 3, amount: 5160 },
+      { date: '2026-05-14', store: storeCatalog[3], ruleId: 'C04', actual: '同支付账号关联4个证件号', hits: 4, members: 4, items: 6, amount: 18890 },
+      { date: '2026-05-14', store: storeCatalog[4], ruleId: 'C05', actual: '单笔现金支付6,800元', hits: 5, members: 5, items: 7, amount: 39200 },
+      { date: '2026-05-14', store: storeCatalog[5], ruleId: 'C06', actual: '当月退货笔数为均值的1.32倍', hits: 11, members: 9, items: 12, amount: 12680 },
+      { date: '2026-05-14', store: storeCatalog[6], ruleId: 'C07', actual: '当月退货金额为均值的1.12倍', hits: 7, members: 6, items: 8, amount: 45890 },
+      { date: '2026-05-14', store: storeCatalog[7], ruleId: 'C08', actual: '交易价格较含税成本低120元', hits: 6, members: 6, items: 6, amount: 9820 },
+      { date: '2026-05-14', store: storeCatalog[8], ruleId: 'C09', actual: '临时折扣率32%', hits: 8, members: 8, items: 10, amount: 17640 },
+      { date: '2026-05-14', store: storeCatalog[9], ruleId: 'C10', actual: '提货人与购买人证件号不一致', hits: 4, members: 4, items: 5, amount: 11860 },
+      { date: '2026-05-14', store: storeCatalog[10], ruleId: 'C11', actual: '同一提货人1小时内提货4笔', hits: 4, members: 4, items: 9, amount: 15670 },
+      { date: '2026-05-14', store: storeCatalog[11], ruleId: 'L01', actual: '同支付账号关联4个证件，30分钟内同人提货', hits: 5, members: 5, items: 11, amount: 56200 },
+      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01', actual: '同证件30天同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
+      { date: '2026-05-13', store: storeCatalog[13], ruleId: 'C05', actual: '收银员日现金结算笔数占比34%', hits: 6, members: 6, items: 6, amount: 31200 },
+      { date: '2026-05-13', store: storeCatalog[14], ruleId: 'L01', actual: '3个证件由同支付账号付款并集中提货', hits: 3, members: 3, items: 8, amount: 34880 }
+    ];
+
+    const detailProfiles = [
+      { date: '2026-05-14', time: '10:12:35', store: storeCatalog[0], ruleId: 'C01', receipt: 'XS202605140818001', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '同证件30天同商品4次', deviation: '+1次', desc: '同一证件高频购买相同商品' },
+      { date: '2026-05-14', time: '11:24:08', store: storeCatalog[0], ruleId: 'C01', receipt: 'XS202605140818002', pos: 'POS-03', cashier: '李某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '支付宝', saleAmount: 1680, paidAmount: 1680, actual: '单日订单6笔', deviation: '+1笔', desc: '同一证件单日订单数超过阈值' },
+      { date: '2026-05-14', time: '09:40:19', store: storeCatalog[1], ruleId: 'C02', receipt: 'XS202605140819001', pos: 'POS-02', cashier: '赵某', cert: 'P1234****88', sku: 'SKU-C02-001', product: '精品商品B', pay: '微信', saleAmount: 2380, paidAmount: 2380, actual: '同护照信息对应3个顾客姓名', deviation: '+1次', desc: '护照、身份信息相同但顾客姓名不同' },
+      { date: '2026-05-14', time: '15:18:42', store: storeCatalog[2], ruleId: 'C03', receipt: 'XS202605146118001', pos: 'POS-06', cashier: '孙某', cert: 'ID6101********3390', sku: 'SKU-C03-001', product: '食品礼盒C', pay: '银行卡', saleAmount: 980, paidAmount: 980, actual: '两笔订单间隔8小时20分钟', deviation: '命中', desc: '航班购物时间存在逻辑异常' },
+      { date: '2026-05-14', time: '16:02:27', store: storeCatalog[3], ruleId: 'C04', receipt: 'XS202605146610001', pos: 'POS-04', cashier: '周某', cert: 'ID2102********5512', sku: 'SKU-C04-001', product: '酒水商品D', pay: '同一支付账号', saleAmount: 4890, paidAmount: 4890, actual: '同支付账号关联4个证件号', deviation: '+1个', desc: '支付人与证件人存在不一致风险' },
+      { date: '2026-05-14', time: '13:46:50', store: storeCatalog[4], ruleId: 'C05', receipt: 'XS202605146702001', pos: 'POS-01', cashier: '吴某', cert: 'ID2311********9088', sku: 'SKU-C05-001', product: '腕表商品E', pay: '现金', saleAmount: 6800, paidAmount: 6800, actual: '单笔现金支付6,800元', deviation: '+1,800元', desc: '大额现金结算超过单笔阈值' },
+      { date: '2026-05-14', time: '18:12:21', store: storeCatalog[5], ruleId: 'C06', receipt: 'TH202605146743001', pos: 'POS-05', cashier: '郑某', cert: 'ID1507********6610', sku: 'SKU-C06-001', product: '退货商品F', pay: '原路退回', saleAmount: -860, paidAmount: -860, actual: '当月退货笔数为均值的1.32倍', deviation: '+0.07倍', desc: '退货笔数频率高于历史均值阈值' },
+      { date: '2026-05-14', time: '18:28:56', store: storeCatalog[6], ruleId: 'C07', receipt: 'TH202605146764001', pos: 'POS-02', cashier: '钱某', cert: 'ID4301********7791', sku: 'SKU-C07-001', product: '退货商品G', pay: '原路退回', saleAmount: -12600, paidAmount: -12600, actual: '当月退货金额为均值的1.12倍', deviation: '+0.07倍', desc: '退货金额频率高于历史均值阈值' },
+      { date: '2026-05-14', time: '12:35:09', store: storeCatalog[7], ruleId: 'C08', receipt: 'XS202605146791001', pos: 'POS-07', cashier: '冯某', cert: 'ID3502********1024', sku: 'SKU-C08-001', product: '香化单品H', pay: '银行卡', saleAmount: 780, paidAmount: 780, actual: '交易价格780元，含税成本900元', deviation: '-120元', desc: '交易价格低于含税成本' },
+      { date: '2026-05-14', time: '14:44:18', store: storeCatalog[8], ruleId: 'C09', receipt: 'XS202605146810001', pos: 'POS-04', cashier: '陈某', cert: 'ID6501********2450', sku: 'SKU-C09-001', product: '精品商品I', pay: '微信', saleAmount: 1360, paidAmount: 1360, actual: '临时折扣率32%', deviation: '+7%', desc: '临时折扣超出权限阈值' },
+      { date: '2026-05-14', time: '17:10:03', store: storeCatalog[9], ruleId: 'C10', receipt: 'XS202605146826001', pos: 'POS-03', cashier: '刘某', cert: 'ID4401********7312', sku: 'SKU-C10-001', product: '寄存商品J', pay: '支付宝', saleAmount: 2680, paidAmount: 2680, actual: '提货人与购买人证件号不一致', deviation: '不一致', desc: '提货（寄存）人与购买人不一致' },
+      { date: '2026-05-14', time: '19:05:36', store: storeCatalog[10], ruleId: 'C11', receipt: 'TH202605146842001', pos: 'PICK-01', cashier: '何某', cert: 'ID3301********4456', sku: 'SKU-C11-001', product: '集中提货商品K', pay: '已支付', saleAmount: 4980, paidAmount: 4980, actual: '同一提货人1小时内提货4笔', deviation: '+1笔', desc: '同一提货人短时间集中提货' },
+      { date: '2026-05-14', time: '20:22:14', store: storeCatalog[11], ruleId: 'L01', receipt: 'XS202605146850001', pos: 'POS-06', cashier: '宋某', cert: 'ID3702********8099', sku: 'SKU-L01-001', product: '团伙识别商品L', pay: '同一支付账号', saleAmount: 11200, paidAmount: 11200, actual: '4个证件同支付账号付款，30分钟内同人提货', deviation: '+1个证件', desc: '疑似代购团伙集中购买与提货' },
+      { date: '2026-05-13', time: '10:58:11', store: storeCatalog[12], ruleId: 'C01', receipt: 'XS202605136851001', pos: 'POS-02', cashier: '高某', cert: 'ID2101********6621', sku: 'SKU-C01-002', product: '香化套装M', pay: '银行卡', saleAmount: 1280, paidAmount: 1280, actual: '同证件30天同商品3次', deviation: '达阈值', desc: '同一证件高频购买达到阈值' },
+      { date: '2026-05-13', time: '12:01:46', store: storeCatalog[13], ruleId: 'C05', receipt: 'XS202605136852001', pos: 'POS-01', cashier: '曹某', cert: 'ID5301********4418', sku: 'SKU-C05-002', product: '精品商品N', pay: '现金', saleAmount: 5200, paidAmount: 5200, actual: '单笔现金支付5,200元', deviation: '+200元', desc: '大额现金结算超过单笔阈值' },
+      { date: '2026-05-13', time: '16:33:29', store: storeCatalog[14], ruleId: 'L01', receipt: 'XS202605136853001', pos: 'POS-08', cashier: '许某', cert: 'ID3101********7731', sku: 'SKU-L01-002', product: '团伙识别商品O', pay: '同一支付账号', saleAmount: 9860, paidAmount: 9860, actual: '3个证件同支付账号付款并集中提货', deviation: '达阈值', desc: '疑似代购团伙识别命中' }
+    ];
+
+    const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
+    const allRuleIds = ruleCatalog.map(rule => rule.id);
+
+    const summaryData = summaryProfiles.map((item, index) => ({
+      id: index + 1,
+      ...item,
+      ruleName: ruleMap[item.ruleId].name,
+      ruleContent: ruleMap[item.ruleId].content,
+      threshold: ruleMap[item.ruleId].threshold,
+      level: ruleMap[item.ruleId].level
+    }));
+
+    const detailData = detailProfiles.map((item, index) => ({
+      id: index + 1,
+      ...item,
+      storeCode: extractStoreCode(item.store),
+      ruleName: ruleMap[item.ruleId].name,
+      ruleContent: ruleMap[item.ruleId].content,
+      threshold: ruleMap[item.ruleId].threshold,
+      level: ruleMap[item.ruleId].level
+    }));
 
     const state = {
       stores: ['全部门店'],
-      rule: '全部规则',
+      ruleIds: [...allRuleIds],
+      ruleName: '全部规则',
       threshold: '全部阈值',
       startDate: '2026-05-01',
       endDate: '2026-05-14',
-      selectedSummary: null,
-      sort: { table: null, key: null, dir: 'asc' }
+      selectedSummary: null
     };
 
     const $ = selector => document.querySelector(selector);
     const $$ = selector => Array.from(document.querySelectorAll(selector));
     const formatNumber = value => Number(value).toLocaleString('zh-CN', { maximumFractionDigits: 0 });
     const formatMoney = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const levelClass = level => level === '高风险' ? 'high' : level === '中风险' ? 'mid' : 'low';
     const escapeHtml = value => String(value).replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+
+    function extractStoreCode(store) {
+      const matched = String(store).match(/^\[(.*?)\]/);
+      return matched ? matched[1] : '-';
+    }
+
+    function levelClass(level) {
+      if (level.includes('高')) return 'high';
+      if (level.includes('低')) return 'low';
+      return 'mid';
+    }
 
     function showToast(text) {
       $('#toastText').textContent = text;
       $('#toast').classList.add('show');
       setTimeout(() => $('#toast').classList.remove('show'), 1800);
+    }
+
+    function selectedRuleSet() {
+      return new Set(state.ruleIds.length ? state.ruleIds : allRuleIds);
     }
 
     function getSelectedStores() {
@@ -920,42 +1012,31 @@
 
     function applyFilters(data) {
       const selectedStores = getSelectedStores();
+      const ruleIds = selectedRuleSet();
       return data.filter(item => {
         const storeOk = selectedStores.length === 0 || selectedStores.includes(item.store);
-        const ruleOk = state.rule === '全部规则' || item.rule === state.rule;
+        const ruleIdOk = ruleIds.has(item.ruleId);
+        const ruleNameOk = state.ruleName === '全部规则' || item.ruleName === state.ruleName;
         const thresholdOk = state.threshold === '全部阈值' || item.threshold === state.threshold;
-        return inDateRange(item) && storeOk && ruleOk && thresholdOk;
-      });
-    }
-
-    function sortRows(rows, tableName) {
-      if (state.sort.table !== tableName || !state.sort.key) return rows;
-      const { key, dir } = state.sort;
-      return [...rows].sort((a, b) => {
-        const av = a[key];
-        const bv = b[key];
-        const result = typeof av === 'number' && typeof bv === 'number'
-          ? av - bv
-          : String(av).localeCompare(String(bv), 'zh-CN');
-        return dir === 'asc' ? result : -result;
+        return inDateRange(item) && storeOk && ruleIdOk && ruleNameOk && thresholdOk;
       });
     }
 
     function getSummaryRows() {
-      return sortRows(applyFilters(summaryData), 'summaryTable');
+      return applyFilters(summaryData);
     }
 
     function getDetailRows() {
       let rows = applyFilters(detailData);
       if (state.selectedSummary) {
-        rows = rows.filter(item => item.store === state.selectedSummary.store && item.rule === state.selectedSummary.rule && item.threshold === state.selectedSummary.threshold);
+        rows = rows.filter(item => item.store === state.selectedSummary.store && item.ruleId === state.selectedSummary.ruleId && item.threshold === state.selectedSummary.threshold);
       }
-      return sortRows(rows, 'detailTable');
+      return rows;
     }
 
     function renderMetrics(summaryRows, detailRows) {
       const stores = new Set(summaryRows.map(item => item.store));
-      const rules = new Set(summaryRows.map(item => item.rule));
+      const rules = new Set(summaryRows.map(item => item.ruleId));
       const hits = summaryRows.reduce((sum, item) => sum + item.hits, 0);
       const amount = summaryRows.reduce((sum, item) => sum + item.amount, 0);
 
@@ -975,14 +1056,16 @@
           <td class="center">${index + 1}</td>
           <td>${row.date}</td>
           <td>${escapeHtml(row.store)}</td>
-          <td>${escapeHtml(row.rule)}</td>
-          <td>${escapeHtml(row.threshold)}</td>
+          <td>${row.ruleId}</td>
+          <td>${escapeHtml(row.ruleName)}</td>
+          <td class="wide-text" title="${escapeHtml(row.ruleContent)}">${escapeHtml(row.ruleContent)}</td>
+          <td class="wide-text" title="${escapeHtml(row.threshold)}">${escapeHtml(row.threshold)}</td>
+          <td>${escapeHtml(row.actual)}</td>
           <td class="num">${formatNumber(row.hits)}</td>
           <td class="num">${formatNumber(row.members)}</td>
           <td class="num">${formatNumber(row.items)}</td>
           <td class="num">${formatMoney(row.amount)}</td>
           <td><span class="tag ${levelClass(row.level)}">${row.level}</span></td>
-          <td>${row.lastTime}</td>
         </tr>
       `).join('');
 
@@ -994,7 +1077,7 @@
         tr.addEventListener('click', () => {
           const row = summaryData.find(item => item.id === Number(tr.dataset.id));
           state.selectedSummary = row;
-          $('#detailTip').textContent = `当前展示：${row.store}｜${row.rule}｜${row.threshold}`;
+          $('#detailTip').textContent = `当前展示：${row.store}｜${row.ruleId} ${row.ruleName}｜${row.threshold}`;
           switchTab('detailPanel');
           render();
         });
@@ -1009,24 +1092,24 @@
           <td class="center">${index + 1}</td>
           <td>${row.date}</td>
           <td>${row.time}</td>
-          <td>${row.code}</td>
+          <td>${row.storeCode}</td>
           <td>${escapeHtml(row.store)}</td>
+          <td>${row.ruleId}</td>
+          <td>${escapeHtml(row.ruleName)}</td>
           <td><span class="link">${row.receipt}</span></td>
           <td>${row.pos}</td>
           <td>${row.cashier}</td>
-          <td>${row.member}</td>
+          <td>${row.cert}</td>
           <td>${row.sku}</td>
           <td>${escapeHtml(row.product)}</td>
-          <td>${row.category}</td>
-          <td class="num">${formatNumber(row.qty)}</td>
+          <td>${row.pay}</td>
           <td class="num">${formatMoney(row.saleAmount)}</td>
           <td class="num">${formatMoney(row.paidAmount)}</td>
-          <td>${escapeHtml(row.rule)}</td>
-          <td>${escapeHtml(row.threshold)}</td>
+          <td class="wide-text" title="${escapeHtml(row.threshold)}">${escapeHtml(row.threshold)}</td>
           <td>${escapeHtml(row.actual)}</td>
           <td>${escapeHtml(row.deviation)}</td>
           <td><span class="tag ${levelClass(row.level)}">${row.level}</span></td>
-          <td>${escapeHtml(row.desc)}</td>
+          <td class="wide-text" title="${escapeHtml(row.desc)}">${escapeHtml(row.desc)}</td>
         </tr>
       `).join('');
 
@@ -1035,28 +1118,17 @@
       $('#detailFooter').textContent = `共 ${rows.length} 条明细记录`;
     }
 
-    function renderSortState() {
-      $$('th.sortable').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
-      if (!state.sort.key) return;
-      const activePanel = $('.tab-panel.active');
-      const th = activePanel.querySelector(`th.sortable[data-key="${state.sort.key}"]`);
-      if (th) th.classList.add(state.sort.dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
-    }
-
     function render() {
       const summaryRows = getSummaryRows();
       const detailRows = getDetailRows();
       renderSummary();
       renderDetail();
       renderMetrics(summaryRows, detailRows);
-      renderSortState();
     }
 
     function switchTab(panelId) {
       $$('.inner-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === panelId));
       $$('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === panelId));
-      state.sort.table = panelId === 'summaryPanel' ? 'summaryTable' : 'detailTable';
-      renderSortState();
     }
 
     function syncStoreChip() {
@@ -1071,16 +1143,87 @@
       }
     }
 
+    function syncRuleIdChip() {
+      const chip = $('#ruleIdChip');
+      if (state.ruleIds.length === allRuleIds.length) {
+        chip.textContent = '全部规则ID';
+      } else if (state.ruleIds.length === 1) {
+        chip.textContent = state.ruleIds[0];
+      } else {
+        chip.textContent = `已选 ${state.ruleIds.length} 个规则ID`;
+      }
+    }
+
+    function renderStoreOptions() {
+      $('#storeOptions').innerHTML = [
+        `<label class="option"><input type="checkbox" value="全部门店" checked /><span>全部门店</span></label>`,
+        ...storeCatalog.map(store => `<label class="option"><input type="checkbox" value="${escapeHtml(store)}" /><span>${escapeHtml(store)}</span></label>`)
+      ].join('');
+    }
+
+    function renderRuleIdOptions() {
+      $('#ruleIdOptions').innerHTML = [
+        `<label class="option"><input type="checkbox" value="全部规则ID" checked /><span>全部规则ID</span></label>`,
+        ...ruleCatalog.map(rule => `
+          <label class="option">
+            <input type="checkbox" value="${rule.id}" checked />
+            <span class="option-text"><strong>${rule.id}</strong><span class="option-sub">${escapeHtml(rule.name)}</span></span>
+          </label>
+        `)
+      ].join('');
+    }
+
+    function updateRuleSelectOptions() {
+      const selected = selectedRuleSet();
+      const rules = ruleCatalog.filter(rule => selected.has(rule.id));
+      $('#ruleSelect').innerHTML = [
+        '<option value="全部规则">全部规则</option>',
+        ...rules.map(rule => `<option value="${escapeHtml(rule.name)}">${rule.id}｜${escapeHtml(rule.name)}</option>`)
+      ].join('');
+      if (state.ruleName !== '全部规则' && !rules.some(rule => rule.name === state.ruleName)) state.ruleName = '全部规则';
+      $('#ruleSelect').value = state.ruleName;
+      updateThresholdOptions();
+    }
+
+    function updateThresholdOptions() {
+      const selected = selectedRuleSet();
+      const thresholds = [];
+      ruleCatalog.forEach(rule => {
+        if (selected.has(rule.id) && (state.ruleName === '全部规则' || state.ruleName === rule.name) && !thresholds.includes(rule.threshold)) {
+          thresholds.push(rule.threshold);
+        }
+      });
+      $('#thresholdSelect').innerHTML = [
+        '<option value="全部阈值">全部阈值</option>',
+        ...thresholds.map(threshold => `<option value="${escapeHtml(threshold)}">${escapeHtml(threshold)}</option>`)
+      ].join('');
+      if (state.threshold !== '全部阈值' && !thresholds.includes(state.threshold)) state.threshold = '全部阈值';
+      $('#thresholdSelect').value = state.threshold;
+    }
+
+    function syncRuleCheckboxes() {
+      const selected = new Set(state.ruleIds);
+      $$('#ruleIdDropdown input[type="checkbox"]').forEach(input => {
+        input.checked = input.value === '全部规则ID' ? state.ruleIds.length === allRuleIds.length : selected.has(input.value);
+      });
+      syncRuleIdChip();
+    }
+
+    function bindDropdown(dropdownId, triggerId) {
+      const dropdown = $(dropdownId);
+      $(triggerId).addEventListener('click', event => {
+        event.stopPropagation();
+        $$('.dropdown').forEach(item => { if (item !== dropdown) item.classList.remove('open'); });
+        dropdown.classList.toggle('open');
+      });
+      dropdown.querySelector('.dropdown-menu').addEventListener('click', event => event.stopPropagation());
+    }
+
     function bindEvents() {
       $$('.inner-tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
-
-      $('#storeTrigger').addEventListener('click', event => {
-        event.stopPropagation();
-        $('#storeDropdown').classList.toggle('open');
-      });
-
-      document.addEventListener('click', () => $('#storeDropdown').classList.remove('open'));
-      $('#storeDropdown .dropdown-menu').addEventListener('click', event => event.stopPropagation());
+      bindDropdown('#storeDropdown', '#storeTrigger');
+      bindDropdown('#ruleIdDropdown', '#ruleIdTrigger');
+      document.addEventListener('click', () => $$('.dropdown').forEach(item => item.classList.remove('open')));
 
       $$('#storeDropdown input[type="checkbox"]').forEach(input => {
         input.addEventListener('change', () => {
@@ -1090,11 +1233,29 @@
           } else if (input.value !== '全部门店' && input.checked) {
             allInput.checked = false;
           }
-
           const checked = $$('#storeDropdown input[type="checkbox"]:checked').map(item => item.value);
           state.stores = checked.length ? checked : ['全部门店'];
           if (checked.length === 0) allInput.checked = true;
           syncStoreChip();
+        });
+      });
+
+      $$('#ruleIdDropdown input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', () => {
+          const allInput = $('#ruleIdDropdown input[value="全部规则ID"]');
+          if (input.value === '全部规则ID' && input.checked) {
+            state.ruleIds = [...allRuleIds];
+          } else {
+            allInput.checked = false;
+            state.ruleIds = $$('#ruleIdDropdown input[type="checkbox"]:checked')
+              .map(item => item.value)
+              .filter(value => value !== '全部规则ID');
+            if (state.ruleIds.length === 0) state.ruleIds = [...allRuleIds];
+          }
+          state.ruleName = '全部规则';
+          state.threshold = '全部阈值';
+          syncRuleCheckboxes();
+          updateRuleSelectOptions();
         });
       });
 
@@ -1105,10 +1266,43 @@
         });
       });
 
+      $('#ruleIdSearch').addEventListener('input', event => {
+        const keyword = event.target.value.trim().toUpperCase();
+        $$('#ruleIdDropdown .option').forEach(option => {
+          option.style.display = option.textContent.toUpperCase().includes(keyword) ? 'flex' : 'none';
+        });
+      });
+
+      $('#ruleSelect').addEventListener('change', event => {
+        state.ruleName = event.target.value;
+        if (state.ruleName === '全部规则') {
+          state.ruleIds = [...allRuleIds];
+          state.threshold = '全部阈值';
+        } else {
+          const rule = ruleCatalog.find(item => item.name === state.ruleName);
+          if (rule) {
+            state.ruleIds = [rule.id];
+            state.threshold = rule.threshold;
+          }
+        }
+        syncRuleCheckboxes();
+        updateRuleSelectOptions();
+      });
+
+      $('#thresholdSelect').addEventListener('change', event => {
+        state.threshold = event.target.value;
+        if (state.threshold === '全部阈值') return;
+        const matchedRules = ruleCatalog.filter(rule => rule.threshold === state.threshold);
+        state.ruleIds = matchedRules.map(rule => rule.id);
+        state.ruleName = matchedRules.length === 1 ? matchedRules[0].name : '全部规则';
+        syncRuleCheckboxes();
+        updateRuleSelectOptions();
+      });
+
       $('#queryBtn').addEventListener('click', () => {
         state.startDate = $('#startDate').value;
         state.endDate = $('#endDate').value;
-        state.rule = $('#ruleSelect').value;
+        state.ruleName = $('#ruleSelect').value;
         state.threshold = $('#thresholdSelect').value;
         state.selectedSummary = null;
         $('#detailTip').textContent = '展示当前筛选条件下的销售风险明细';
@@ -1119,45 +1313,22 @@
       $('#resetBtn').addEventListener('click', () => {
         $('#startDate').value = '2026-05-01';
         $('#endDate').value = '2026-05-14';
-        $('#ruleSelect').value = '全部规则';
-        $('#thresholdSelect').value = '全部阈值';
         $$('#storeDropdown input[type="checkbox"]').forEach(item => item.checked = item.value === '全部门店');
         Object.assign(state, {
           stores: ['全部门店'],
-          rule: '全部规则',
+          ruleIds: [...allRuleIds],
+          ruleName: '全部规则',
           threshold: '全部阈值',
           startDate: '2026-05-01',
           endDate: '2026-05-14',
-          selectedSummary: null,
-          sort: { table: null, key: null, dir: 'asc' }
+          selectedSummary: null
         });
         syncStoreChip();
+        syncRuleCheckboxes();
+        updateRuleSelectOptions();
         $('#detailTip').textContent = '展示当前筛选条件下的销售风险明细';
         render();
         showToast('筛选条件已重置');
-      });
-
-      $('#ruleSelect').addEventListener('change', event => {
-        const mapping = {
-          '单笔销售金额低于规模阈值': '实付金额 < 100元',
-          '同一会员日内多笔低额消费': '低额订单 ≥ 5笔/日',
-          '重点品类销售低于规则阈值': '重点品类数量 < 3件',
-          '门店日销售低于规模阈值': '日销售额 < 30,000元'
-        };
-        if (mapping[event.target.value]) $('#thresholdSelect').value = mapping[event.target.value];
-      });
-
-      $$('.sortable').forEach(th => {
-        th.addEventListener('click', () => {
-          const table = th.closest('table').id;
-          const key = th.dataset.key;
-          if (state.sort.table === table && state.sort.key === key) {
-            state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
-          } else {
-            state.sort = { table, key, dir: 'asc' };
-          }
-          render();
-        });
       });
 
       $('#exportBtn').addEventListener('click', () => {
@@ -1171,8 +1342,12 @@
       });
     }
 
+    renderStoreOptions();
+    renderRuleIdOptions();
+    updateRuleSelectOptions();
     bindEvents();
     syncStoreChip();
+    syncRuleIdChip();
     render();
   </script>
 </body>
