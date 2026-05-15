@@ -209,6 +209,47 @@
       justify-content: space-between;
     }
 
+    .date-range {
+      gap: 10px;
+      justify-content: flex-start;
+    }
+
+    .date-range em {
+      color: #7a8ba0;
+      font-style: normal;
+    }
+
+    .multi-select {
+      min-height: 34px;
+      height: auto;
+      padding: 4px 10px;
+      gap: 6px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 8px;
+      color: #237be8;
+      background: #eaf4ff;
+      border: 1px solid #b9d9ff;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    .select-placeholder {
+      color: #7a8ba0;
+      flex: 1;
+    }
+
+    .select-arrow {
+      color: #7a8ba0;
+      margin-left: auto;
+    }
+
     .filter-actions {
       display: flex;
       justify-content: flex-end;
@@ -234,6 +275,41 @@
 
     .panel {
       margin-bottom: 14px;
+    }
+
+    .inner-tabs {
+      display: flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 14px;
+      background: #fff;
+      border-bottom: 1px solid #e6ebf3;
+      gap: 4px;
+    }
+
+    .inner-tab {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      color: #5f6f85;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .inner-tab.active {
+      color: #237be8;
+      border-bottom-color: #237be8;
+      background: #f6faff;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
     }
 
     .panel-header {
@@ -431,36 +507,20 @@
     <section class="filter-card">
       <div class="filter-grid">
         <div class="field">
-          <label>业务日期</label>
-          <div class="input">2026-05-14</div>
+          <label>日期范围</label>
+          <div class="input date-range"><span>2026-05-01</span><em>至</em><span>2026-05-14</span></div>
         </div>
         <div class="field">
           <label>门店</label>
-          <div class="select">全部门店 <span>⌄</span></div>
+          <div class="select multi-select"><span class="chip">全部门店</span><span class="select-placeholder">下拉多选</span><span class="select-arrow">⌄</span></div>
         </div>
         <div class="field">
           <label>规则</label>
           <div class="select">全部规则 <span>⌄</span></div>
         </div>
         <div class="field">
-          <label>风险等级</label>
-          <div class="select">全部 <span>⌄</span></div>
-        </div>
-        <div class="field">
-          <label>单据号</label>
-          <div class="input">请输入单据号</div>
-        </div>
-        <div class="field">
-          <label>会员编号</label>
-          <div class="input">请输入会员编号</div>
-        </div>
-        <div class="field">
-          <label>商品编码</label>
-          <div class="input">请输入商品编码</div>
-        </div>
-        <div class="field">
-          <label>是否命中</label>
-          <div class="select">是 <span>⌄</span></div>
+          <label>阈值</label>
+          <div class="select">全部阈值 <span>⌄</span></div>
         </div>
       </div>
       <div class="filter-actions">
@@ -469,12 +529,17 @@
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">销售业务合规风险汇总</div>
-        <div class="panel-tip">日表｜按“门店 + 规则 + 阈值”汇总，点击汇总行联动下方明细</div>
+    <section class="panel report-panel">
+      <div class="inner-tabs">
+        <div class="inner-tab active">汇总值</div>
+        <div class="inner-tab">明细</div>
       </div>
-      <div class="table-wrap">
+      <div class="tab-panel active" id="summary-tab">
+        <div class="panel-header">
+          <div class="panel-title">销售业务合规风险汇总值</div>
+          <div class="panel-tip">按“门店 + 规则 + 阈值”汇总，点击汇总行可联动查看明细</div>
+        </div>
+        <div class="table-wrap">
         <table class="summary-table">
           <thead>
             <tr>
@@ -547,18 +612,18 @@
           </tbody>
         </table>
       </div>
-      <div class="footer-row">
-        <div>共 4 条汇总记录</div>
-        <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">›</span></div>
+        <div class="footer-row">
+          <div>共 4 条汇总记录</div>
+          <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">›</span></div>
+        </div>
       </div>
-    </section>
 
-    <section class="panel">
-      <div class="panel-header">
-        <div class="panel-title">销售业务合规风险明细</div>
-        <div class="panel-tip">当前展示：北京首都机场T3店｜单笔销售金额低于合规阈值｜实付金额 &lt; 100元</div>
-      </div>
-      <div class="table-wrap">
+      <div class="tab-panel" id="detail-tab">
+        <div class="panel-header">
+          <div class="panel-title">销售业务合规风险明细</div>
+          <div class="panel-tip">当前展示：北京首都机场T3店｜单笔销售金额低于合规阈值｜实付金额 &lt; 100元</div>
+        </div>
+        <div class="table-wrap">
         <table>
           <thead>
             <tr>
@@ -681,11 +746,26 @@
           </tbody>
         </table>
       </div>
-      <div class="footer-row">
-        <div>共 18 条明细记录，当前显示 1-4 条</div>
-        <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">2</span><span class="page-btn">3</span><span class="page-btn">›</span></div>
+        <div class="footer-row">
+          <div>共 18 条明细记录，当前显示 1-4 条</div>
+          <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">2</span><span class="page-btn">3</span><span class="page-btn">›</span></div>
+        </div>
       </div>
     </section>
   </main>
+
+  <script>
+    const tabs = document.querySelectorAll('.inner-tab');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(item => item.classList.remove('active'));
+        panels.forEach(panel => panel.classList.remove('active'));
+        tab.classList.add('active');
+        panels[index].classList.add('active');
+      });
+    });
+  </script>
 </body>
 </html>
