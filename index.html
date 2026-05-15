@@ -3,28 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>销售业务合规风险（合规以下）</title>
+  <title>销售业务合规风险（规模以下）</title>
   <style>
-    * {
-      box-sizing: border-box;
+    * { box-sizing: border-box; }
+
+    :root {
+      --primary: #2f73e8;
+      --primary-dark: #1f5ecf;
+      --primary-light: #eaf4ff;
+      --bg: #f3f6fb;
+      --card: #ffffff;
+      --border: #e2e8f2;
+      --text: #1f2d3d;
+      --muted: #6b7c92;
+      --danger: #d93025;
+      --warning: #bd6b00;
+      --success: #1f7a3a;
+      --shadow: 0 8px 24px rgba(31, 45, 61, 0.08);
     }
 
     body {
       margin: 0;
       font-family: "Microsoft YaHei", Arial, sans-serif;
-      color: #1f2d3d;
-      background: #f3f6fb;
+      color: var(--text);
+      background: var(--bg);
       font-size: 14px;
     }
 
     .topbar {
       height: 64px;
-      background: #2f73e8;
+      background: linear-gradient(90deg, #2f73e8 0%, #1f69e6 100%);
       color: #fff;
       display: flex;
       align-items: center;
       padding: 0 28px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+      position: sticky;
+      top: 0;
+      z-index: 30;
     }
 
     .brand {
@@ -38,10 +54,11 @@
     }
 
     .logo {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: conic-gradient(#ff7b54, #ffd166, #29b36a, #3a86ff, #8e44ad, #ff7b54);
+      box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.18);
     }
 
     .nav {
@@ -50,23 +67,26 @@
       align-items: center;
       gap: 8px;
       flex: 1;
+      overflow: hidden;
     }
 
     .nav-item {
       height: 64px;
-      min-width: 126px;
-      padding: 0 22px;
+      min-width: 120px;
+      padding: 0 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 18px;
       color: rgba(255, 255, 255, 0.92);
       position: relative;
+      white-space: nowrap;
     }
 
     .nav-item.active {
-      color: #1f5ecf;
+      color: var(--primary-dark);
       background: #fff;
+      font-weight: 600;
     }
 
     .nav-item.active::after {
@@ -78,27 +98,26 @@
       border-top: 64px solid transparent;
     }
 
-    .search {
-      width: 280px;
+    .global-search {
+      width: 260px;
       height: 38px;
       border-radius: 10px;
       background: #fff;
       display: flex;
       align-items: center;
       padding: 0 12px;
-      color: #b6c0cc;
+      color: #aeb9c7;
       margin-right: 20px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.4);
     }
 
-    .search span:first-child {
-      flex: 1;
-    }
+    .global-search span:first-child { flex: 1; }
 
     .icons {
       display: flex;
       align-items: center;
-      gap: 18px;
-      font-size: 24px;
+      gap: 16px;
+      font-size: 22px;
     }
 
     .avatar {
@@ -114,7 +133,7 @@
       font-weight: 700;
     }
 
-    .tabs {
+    .page-tabs {
       height: 48px;
       background: #fff;
       display: flex;
@@ -122,9 +141,12 @@
       padding: 0 22px;
       gap: 8px;
       box-shadow: 0 1px 5px rgba(31, 45, 61, 0.18);
+      position: sticky;
+      top: 64px;
+      z-index: 20;
     }
 
-    .tab {
+    .page-tab {
       height: 34px;
       display: flex;
       align-items: center;
@@ -135,97 +157,135 @@
       background: #fff;
     }
 
-    .tab.active {
+    .page-tab.active {
       color: #fff;
       background: #2487e8;
       border-color: #2487e8;
     }
 
     .toolbar {
-      height: 50px;
+      height: 52px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       background: #fff;
       border-bottom: 1px solid #e4e9f2;
       padding: 0 20px;
-      gap: 20px;
     }
 
-    .export {
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .action-link {
       color: #303d4f;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       display: flex;
       align-items: center;
       gap: 6px;
       cursor: pointer;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 4px;
+    }
+
+    .action-link:hover { background: #f0f5fc; color: var(--primary); }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #26a269;
+      box-shadow: 0 0 0 4px rgba(38, 162, 105, 0.12);
     }
 
     .page {
-      padding: 14px 18px 24px;
+      padding: 16px 18px 28px;
     }
 
     .filter-card,
-    .panel {
-      background: #fff;
-      border: 1px solid #e7ebf3;
-      box-shadow: 0 1px 4px rgba(31, 45, 61, 0.06);
+    .panel,
+    .metric-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
     }
 
     .filter-card {
-      padding: 18px 20px 8px;
+      padding: 18px 20px 12px;
       margin-bottom: 14px;
+      border-radius: 8px;
     }
 
     .filter-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(220px, 1fr));
-      gap: 14px 26px;
-    }
-
-    .field {
-      display: grid;
-      grid-template-columns: 86px 1fr;
-      align-items: center;
-      gap: 8px;
+      grid-template-columns: 1.2fr 1.4fr 1fr 1fr auto;
+      gap: 14px 18px;
+      align-items: end;
     }
 
     .field label {
+      display: block;
+      margin-bottom: 7px;
       color: #5f6f85;
-      text-align: right;
-      white-space: nowrap;
+      font-weight: 600;
     }
 
     .input,
-    .select {
-      height: 34px;
+    .select,
+    .date-input {
+      height: 36px;
       border: 1px solid #d8dee9;
-      border-radius: 4px;
+      border-radius: 5px;
       padding: 0 10px;
       color: #2f3e52;
       background: #fff;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      transition: border-color 0.16s, box-shadow 0.16s;
+    }
+
+    .input:focus-within,
+    .select:hover,
+    .date-input:focus {
+      border-color: #73aaf3;
+      box-shadow: 0 0 0 3px rgba(47, 115, 232, 0.12);
     }
 
     .date-range {
-      gap: 10px;
-      justify-content: flex-start;
+      display: grid;
+      grid-template-columns: 1fr 20px 1fr;
+      gap: 8px;
+      align-items: center;
     }
 
-    .date-range em {
+    .date-range span {
       color: #7a8ba0;
-      font-style: normal;
+      text-align: center;
     }
 
-    .multi-select {
-      min-height: 34px;
+    .date-input {
+      width: 100%;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-trigger {
+      min-height: 36px;
       height: auto;
-      padding: 4px 10px;
       gap: 6px;
       justify-content: flex-start;
       flex-wrap: wrap;
+      cursor: pointer;
     }
 
     .chip {
@@ -234,10 +294,14 @@
       height: 24px;
       padding: 0 8px;
       color: #237be8;
-      background: #eaf4ff;
+      background: var(--primary-light);
       border: 1px solid #b9d9ff;
       border-radius: 12px;
       font-size: 12px;
+      max-width: 136px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .select-placeholder {
@@ -248,39 +312,135 @@
     .select-arrow {
       color: #7a8ba0;
       margin-left: auto;
+      transition: transform 0.16s;
     }
 
-    .filter-actions {
+    .dropdown.open .select-arrow { transform: rotate(180deg); }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: calc(100% + 6px);
+      width: 100%;
+      min-width: 260px;
+      background: #fff;
+      border: 1px solid #dfe6f1;
+      border-radius: 8px;
+      box-shadow: 0 16px 36px rgba(31,45,61,0.16);
+      z-index: 40;
+      padding: 8px;
+    }
+
+    .dropdown.open .dropdown-menu { display: block; }
+
+    .option-search {
+      height: 32px;
+      width: 100%;
+      border: 1px solid #d8dee9;
+      border-radius: 4px;
+      padding: 0 8px;
+      margin-bottom: 6px;
+      outline: none;
+    }
+
+    .option {
+      height: 34px;
       display: flex;
-      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .option:hover { background: #f3f8ff; }
+
+    .option input { accent-color: var(--primary); }
+
+    .btn-group {
+      display: flex;
+      align-items: center;
       gap: 10px;
-      margin-top: 14px;
     }
 
     .btn {
-      height: 34px;
-      border-radius: 4px;
+      height: 36px;
+      border-radius: 5px;
       border: 1px solid #cfd8e6;
       padding: 0 18px;
       background: #fff;
       color: #2f3e52;
       cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
     }
 
     .btn.primary {
-      background: #2487e8;
+      background: var(--primary);
       color: #fff;
-      border-color: #2487e8;
+      border-color: var(--primary);
+      box-shadow: 0 6px 14px rgba(47, 115, 232, 0.22);
     }
+
+    .btn:hover { filter: brightness(0.98); }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .metric-card {
+      border-radius: 8px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric-card::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      top: -28px;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: rgba(47, 115, 232, 0.08);
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      line-height: 34px;
+      font-weight: 800;
+      color: #213247;
+    }
+
+    .metric-extra {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #7a8ba0;
+    }
+
+    .metric-extra strong { color: var(--primary); }
 
     .panel {
       margin-bottom: 14px;
+      border-radius: 8px;
+      overflow: hidden;
     }
 
     .inner-tabs {
       display: flex;
       align-items: center;
-      height: 44px;
+      height: 48px;
       padding: 0 14px;
       background: #fff;
       border-bottom: 1px solid #e6ebf3;
@@ -288,32 +448,46 @@
     }
 
     .inner-tab {
-      height: 44px;
+      height: 48px;
       display: flex;
       align-items: center;
       padding: 0 22px;
       color: #5f6f85;
       border-bottom: 3px solid transparent;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: 700;
+      gap: 8px;
     }
 
     .inner-tab.active {
-      color: #237be8;
-      border-bottom-color: #237be8;
+      color: var(--primary);
+      border-bottom-color: var(--primary);
       background: #f6faff;
     }
 
-    .tab-panel {
-      display: none;
+    .badge {
+      min-width: 22px;
+      height: 20px;
+      border-radius: 10px;
+      padding: 0 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #edf2fa;
+      color: #617088;
+      font-size: 12px;
     }
 
-    .tab-panel.active {
-      display: block;
+    .inner-tab.active .badge {
+      color: #fff;
+      background: var(--primary);
     }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
     .panel-header {
-      height: 42px;
+      height: 46px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -324,7 +498,7 @@
 
     .panel-title {
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 800;
       color: #24364b;
       display: flex;
       align-items: center;
@@ -336,7 +510,7 @@
       display: inline-block;
       width: 4px;
       height: 18px;
-      background: #2487e8;
+      background: var(--primary);
       border-radius: 2px;
     }
 
@@ -347,12 +521,15 @@
 
     .table-wrap {
       overflow: auto;
+      max-height: calc(100vh - 360px);
+      min-height: 300px;
     }
 
     table {
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       width: 100%;
-      min-width: 1180px;
+      min-width: 1200px;
     }
 
     th,
@@ -368,60 +545,61 @@
     th {
       color: #34465c;
       background: #eef3fa;
-      font-weight: 700;
+      font-weight: 800;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      user-select: none;
     }
 
-    tbody tr:nth-child(even) {
-      background: #fbfcff;
-    }
+    th.sortable { cursor: pointer; }
+    th.sortable::after { content: " ⇅"; color: #94a3b8; font-weight: 400; }
+    th.sorted-asc::after { content: " ↑"; color: var(--primary); }
+    th.sorted-desc::after { content: " ↓"; color: var(--primary); }
 
-    tbody tr:hover {
-      background: #eaf4ff;
-    }
-
-    .summary-table tbody tr:first-child {
+    tbody tr:nth-child(even) { background: #fbfcff; }
+    tbody tr:hover { background: #eaf4ff; }
+    tbody tr.selected {
       background: #f3f8ff;
       outline: 1px solid #7db7f3;
     }
 
-    .num {
-      text-align: right;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .center {
-      text-align: center;
-    }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .center { text-align: center; }
 
     .tag {
       display: inline-block;
       padding: 2px 8px;
       border-radius: 10px;
       font-size: 12px;
+      font-weight: 700;
     }
 
-    .tag.high {
-      color: #d93025;
-      background: #fdeceb;
-    }
-
-    .tag.mid {
-      color: #bd6b00;
-      background: #fff3dc;
-    }
-
-    .tag.low {
-      color: #1f7a3a;
-      background: #e8f6ed;
-    }
+    .tag.high { color: var(--danger); background: #fdeceb; }
+    .tag.mid { color: var(--warning); background: #fff3dc; }
+    .tag.low { color: var(--success); background: #e8f6ed; }
 
     .link {
       color: #237be8;
       cursor: pointer;
+      font-weight: 700;
     }
 
+    .empty {
+      height: 220px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #7a8ba0;
+      flex-direction: column;
+      gap: 10px;
+      background: #fff;
+    }
+
+    .empty.show { display: flex; }
+
     .footer-row {
-      height: 42px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -446,27 +624,40 @@
       align-items: center;
       justify-content: center;
       background: #fff;
+      cursor: pointer;
     }
 
     .page-btn.active {
-      background: #2487e8;
-      border-color: #2487e8;
+      background: var(--primary);
+      border-color: var(--primary);
       color: #fff;
     }
 
-    @media (max-width: 1280px) {
-      .filter-grid {
-        grid-template-columns: repeat(2, minmax(220px, 1fr));
-      }
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      min-width: 240px;
+      height: 44px;
+      padding: 0 16px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: rgba(31, 45, 61, 0.92);
+      color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+      z-index: 99;
+    }
 
-      .brand {
-        min-width: 240px;
-      }
+    .toast.show { display: flex; }
 
-      .nav-item {
-        min-width: 100px;
-        padding: 0 12px;
-      }
+    @media (max-width: 1320px) {
+      .filter-grid { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .brand { min-width: 240px; }
+      .nav-item { min-width: 100px; padding: 0 12px; }
+      .global-search { display: none; }
     }
   </style>
 </head>
@@ -485,7 +676,7 @@
       <div class="nav-item active">风险管控</div>
       <div class="nav-item">离线分析</div>
     </nav>
-    <div class="search"><span>搜索</span><span>⌕</span></div>
+    <div class="global-search"><span>搜索</span><span>⌕</span></div>
     <div class="icons">
       <span>▣</span>
       <span>♢</span>
@@ -494,13 +685,20 @@
     </div>
   </header>
 
-  <section class="tabs">
-    <div class="tab">经营看板 ×</div>
-    <div class="tab active">销售业务合规风险（合规以下） ×</div>
+  <section class="page-tabs">
+    <div class="page-tab">经营看板 ×</div>
+    <div class="page-tab active">销售业务合规风险（规模以下） ×</div>
   </section>
 
   <section class="toolbar">
-    <div class="export">⇱ 导出</div>
+    <div class="toolbar-left">
+      <div class="action-link" id="exportBtn">⇱ 导出</div>
+      <div class="action-link" id="refreshBtn">↻ 刷新</div>
+    </div>
+    <div class="toolbar-right">
+      <span class="status-dot"></span>
+      <span id="updateTime">数据更新时间：2026-05-15 08:30:00</span>
+    </div>
   </section>
 
   <main class="page">
@@ -508,264 +706,474 @@
       <div class="filter-grid">
         <div class="field">
           <label>日期范围</label>
-          <div class="input date-range"><span>2026-05-01</span><em>至</em><span>2026-05-14</span></div>
+          <div class="date-range">
+            <input class="date-input" id="startDate" type="date" value="2026-05-01" />
+            <span>至</span>
+            <input class="date-input" id="endDate" type="date" value="2026-05-14" />
+          </div>
         </div>
-        <div class="field">
+
+        <div class="field dropdown" id="storeDropdown">
           <label>门店</label>
-          <div class="select multi-select"><span class="chip">全部门店</span><span class="select-placeholder">下拉多选</span><span class="select-arrow">⌄</span></div>
+          <div class="select dropdown-trigger" id="storeTrigger">
+            <span class="chip" id="storeChip">全部门店</span>
+            <span class="select-placeholder">下拉多选</span>
+            <span class="select-arrow">⌄</span>
+          </div>
+          <div class="dropdown-menu">
+            <input class="option-search" id="storeSearch" placeholder="搜索门店" />
+            <label class="option"><input type="checkbox" value="全部门店" checked />全部门店</label>
+            <label class="option"><input type="checkbox" value="北京首都机场T3店" />北京首都机场T3店</label>
+            <label class="option"><input type="checkbox" value="上海浦东机场店" />上海浦东机场店</label>
+            <label class="option"><input type="checkbox" value="广州白云机场店" />广州白云机场店</label>
+            <label class="option"><input type="checkbox" value="三亚国际免税城A区店" />三亚国际免税城A区店</label>
+          </div>
         </div>
+
         <div class="field">
           <label>规则</label>
-          <div class="select">全部规则 <span>⌄</span></div>
+          <select class="select" id="ruleSelect">
+            <option value="全部规则">全部规则</option>
+            <option value="单笔销售金额低于规模阈值">单笔销售金额低于规模阈值</option>
+            <option value="同一会员日内多笔低额消费">同一会员日内多笔低额消费</option>
+            <option value="重点品类销售低于规则阈值">重点品类销售低于规则阈值</option>
+            <option value="门店日销售低于规模阈值">门店日销售低于规模阈值</option>
+          </select>
         </div>
+
         <div class="field">
           <label>阈值</label>
-          <div class="select">全部阈值 <span>⌄</span></div>
+          <select class="select" id="thresholdSelect">
+            <option value="全部阈值">全部阈值</option>
+            <option value="实付金额 < 100元">实付金额 &lt; 100元</option>
+            <option value="低额订单 ≥ 5笔/日">低额订单 ≥ 5笔/日</option>
+            <option value="重点品类数量 < 3件">重点品类数量 &lt; 3件</option>
+            <option value="日销售额 < 30,000元">日销售额 &lt; 30,000元</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn primary" id="queryBtn">查询</button>
+          <button class="btn" id="resetBtn">重置</button>
         </div>
       </div>
-      <div class="filter-actions">
-        <button class="btn primary">查询</button>
-        <button class="btn">重置</button>
+    </section>
+
+    <section class="metrics">
+      <div class="metric-card">
+        <div class="metric-label">命中门店数</div>
+        <div class="metric-value" id="storeMetric">4</div>
+        <div class="metric-extra">较昨日 <strong>+1</strong></div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">命中规则数</div>
+        <div class="metric-value" id="ruleMetric">4</div>
+        <div class="metric-extra">覆盖规模以下销售规则</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">命中笔数</div>
+        <div class="metric-value" id="hitMetric">38</div>
+        <div class="metric-extra">当前筛选范围内汇总</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">风险销售金额</div>
+        <div class="metric-value" id="amountMetric">31,170</div>
+        <div class="metric-extra">单位：元</div>
       </div>
     </section>
 
     <section class="panel report-panel">
       <div class="inner-tabs">
-        <div class="inner-tab active">汇总值</div>
-        <div class="inner-tab">明细</div>
+        <div class="inner-tab active" data-tab="summaryPanel">汇总值 <span class="badge" id="summaryBadge">4</span></div>
+        <div class="inner-tab" data-tab="detailPanel">明细 <span class="badge" id="detailBadge">8</span></div>
       </div>
-      <div class="tab-panel active" id="summary-tab">
+
+      <div class="tab-panel active" id="summaryPanel">
         <div class="panel-header">
-          <div class="panel-title">销售业务合规风险汇总值</div>
-          <div class="panel-tip">按“门店 + 规则 + 阈值”汇总，点击汇总行可联动查看明细</div>
+          <div class="panel-title">销售业务合规风险（规模以下）汇总值</div>
+          <div class="panel-tip">按“门店 + 规则 + 阈值”汇总，点击行可切换到对应明细</div>
         </div>
         <div class="table-wrap">
-        <table class="summary-table">
-          <thead>
-            <tr>
-              <th style="width: 60px;" class="center">序号</th>
-              <th>业务日期</th>
-              <th>门店</th>
-              <th>规则</th>
-              <th>阈值</th>
-              <th class="num">命中笔数</th>
-              <th class="num">涉及会员数</th>
-              <th class="num">涉及商品数</th>
-              <th class="num">风险销售金额</th>
-              <th>风险等级</th>
-              <th>最近触发时间</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="center">1</td>
-              <td>2026-05-14</td>
-              <td>北京首都机场T3店</td>
-              <td>单笔销售金额低于合规阈值</td>
-              <td>实付金额 &lt; 100元</td>
-              <td class="num">18</td>
-              <td class="num">15</td>
-              <td class="num">11</td>
-              <td class="num">1,320.00</td>
-              <td><span class="tag mid">中风险</span></td>
-              <td>2026-05-14 21:36:18</td>
-            </tr>
-            <tr>
-              <td class="center">2</td>
-              <td>2026-05-14</td>
-              <td>上海浦东机场店</td>
-              <td>同一会员日内多笔低额消费</td>
-              <td>低额订单 ≥ 5笔/日</td>
-              <td class="num">7</td>
-              <td class="num">2</td>
-              <td class="num">6</td>
-              <td class="num">860.00</td>
-              <td><span class="tag high">高风险</span></td>
-              <td>2026-05-14 19:08:42</td>
-            </tr>
-            <tr>
-              <td class="center">3</td>
-              <td>2026-05-14</td>
-              <td>广州白云机场店</td>
-              <td>重点品类销售低于规则阈值</td>
-              <td>重点品类数量 &lt; 3件</td>
-              <td class="num">12</td>
-              <td class="num">10</td>
-              <td class="num">4</td>
-              <td class="num">2,410.00</td>
-              <td><span class="tag low">低风险</span></td>
-              <td>2026-05-14 17:26:09</td>
-            </tr>
-            <tr>
-              <td class="center">4</td>
-              <td>2026-05-14</td>
-              <td>三亚国际免税城A区店</td>
-              <td>门店日销售低于合规阈值</td>
-              <td>日销售额 &lt; 30,000元</td>
-              <td class="num">1</td>
-              <td class="num">36</td>
-              <td class="num">42</td>
-              <td class="num">26,580.00</td>
-              <td><span class="tag mid">中风险</span></td>
-              <td>2026-05-14 22:10:55</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          <table id="summaryTable">
+            <thead>
+              <tr>
+                <th style="width: 60px;" class="center">序号</th>
+                <th class="sortable" data-key="date">业务日期</th>
+                <th class="sortable" data-key="store">门店</th>
+                <th class="sortable" data-key="rule">规则</th>
+                <th class="sortable" data-key="threshold">阈值</th>
+                <th class="num sortable" data-key="hits">命中笔数</th>
+                <th class="num sortable" data-key="members">涉及会员数</th>
+                <th class="num sortable" data-key="items">涉及商品数</th>
+                <th class="num sortable" data-key="amount">风险销售金额</th>
+                <th>风险等级</th>
+                <th class="sortable" data-key="lastTime">最近触发时间</th>
+              </tr>
+            </thead>
+            <tbody id="summaryBody"></tbody>
+          </table>
+          <div class="empty" id="summaryEmpty"><strong>暂无汇总数据</strong><span>请调整筛选条件后重新查询</span></div>
+        </div>
         <div class="footer-row">
-          <div>共 4 条汇总记录</div>
+          <div id="summaryFooter">共 0 条汇总记录</div>
           <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">›</span></div>
         </div>
       </div>
 
-      <div class="tab-panel" id="detail-tab">
+      <div class="tab-panel" id="detailPanel">
         <div class="panel-header">
-          <div class="panel-title">销售业务合规风险明细</div>
-          <div class="panel-tip">当前展示：北京首都机场T3店｜单笔销售金额低于合规阈值｜实付金额 &lt; 100元</div>
+          <div class="panel-title">销售业务合规风险（规模以下）明细</div>
+          <div class="panel-tip" id="detailTip">展示当前筛选条件下的销售风险明细</div>
         </div>
         <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 60px;" class="center">序号</th>
-              <th>业务日期</th>
-              <th>销售时间</th>
-              <th>门店编码</th>
-              <th>门店名称</th>
-              <th>单据号</th>
-              <th>POS机号</th>
-              <th>收银员</th>
-              <th>会员编号</th>
-              <th>商品编码</th>
-              <th>商品名称</th>
-              <th>品类</th>
-              <th class="num">销售数量</th>
-              <th class="num">销售金额</th>
-              <th class="num">实付金额</th>
-              <th>规则</th>
-              <th>阈值</th>
-              <th>实际值</th>
-              <th>偏离值</th>
-              <th>风险等级</th>
-              <th>风险说明</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="center">1</td>
-              <td>2026-05-14</td>
-              <td>10:23:15</td>
-              <td>BJ-T3-001</td>
-              <td>北京首都机场T3店</td>
-              <td><span class="link">XS202605140001</span></td>
-              <td>POS-03</td>
-              <td>王某</td>
-              <td>M00129</td>
-              <td>SKU100238</td>
-              <td>香化商品A</td>
-              <td>香化</td>
-              <td class="num">1</td>
-              <td class="num">88.00</td>
-              <td class="num">68.00</td>
-              <td>单笔销售金额低于合规阈值</td>
-              <td>实付金额 &lt; 100元</td>
-              <td>68元</td>
-              <td>-32元</td>
-              <td><span class="tag mid">中风险</span></td>
-              <td>单笔实付金额低于合规阈值</td>
-            </tr>
-            <tr>
-              <td class="center">2</td>
-              <td>2026-05-14</td>
-              <td>11:05:42</td>
-              <td>BJ-T3-001</td>
-              <td>北京首都机场T3店</td>
-              <td><span class="link">XS202605140078</span></td>
-              <td>POS-08</td>
-              <td>李某</td>
-              <td>M00887</td>
-              <td>SKU330876</td>
-              <td>食品商品B</td>
-              <td>食品</td>
-              <td class="num">1</td>
-              <td class="num">95.00</td>
-              <td class="num">95.00</td>
-              <td>单笔销售金额低于合规阈值</td>
-              <td>实付金额 &lt; 100元</td>
-              <td>95元</td>
-              <td>-5元</td>
-              <td><span class="tag low">低风险</span></td>
-              <td>单笔实付金额接近阈值下限</td>
-            </tr>
-            <tr>
-              <td class="center">3</td>
-              <td>2026-05-14</td>
-              <td>14:18:09</td>
-              <td>BJ-T3-001</td>
-              <td>北京首都机场T3店</td>
-              <td><span class="link">XS202605140321</span></td>
-              <td>POS-01</td>
-              <td>赵某</td>
-              <td>M00256</td>
-              <td>SKU220541</td>
-              <td>精品商品C</td>
-              <td>精品</td>
-              <td class="num">1</td>
-              <td class="num">120.00</td>
-              <td class="num">72.00</td>
-              <td>单笔销售金额低于合规阈值</td>
-              <td>实付金额 &lt; 100元</td>
-              <td>72元</td>
-              <td>-28元</td>
-              <td><span class="tag mid">中风险</span></td>
-              <td>折扣后实付金额低于合规阈值</td>
-            </tr>
-            <tr>
-              <td class="center">4</td>
-              <td>2026-05-14</td>
-              <td>21:36:18</td>
-              <td>BJ-T3-001</td>
-              <td>北京首都机场T3店</td>
-              <td><span class="link">XS202605140886</span></td>
-              <td>POS-05</td>
-              <td>陈某</td>
-              <td>M00918</td>
-              <td>SKU778212</td>
-              <td>香化商品D</td>
-              <td>香化</td>
-              <td class="num">1</td>
-              <td class="num">99.00</td>
-              <td class="num">99.00</td>
-              <td>单笔销售金额低于合规阈值</td>
-              <td>实付金额 &lt; 100元</td>
-              <td>99元</td>
-              <td>-1元</td>
-              <td><span class="tag low">低风险</span></td>
-              <td>单笔实付金额低于阈值</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+          <table id="detailTable">
+            <thead>
+              <tr>
+                <th style="width: 60px;" class="center">序号</th>
+                <th class="sortable" data-key="date">业务日期</th>
+                <th class="sortable" data-key="time">销售时间</th>
+                <th>门店编码</th>
+                <th class="sortable" data-key="store">门店名称</th>
+                <th>单据号</th>
+                <th>POS机号</th>
+                <th>收银员</th>
+                <th>会员编号</th>
+                <th>商品编码</th>
+                <th>商品名称</th>
+                <th>品类</th>
+                <th class="num sortable" data-key="qty">销售数量</th>
+                <th class="num sortable" data-key="saleAmount">销售金额</th>
+                <th class="num sortable" data-key="paidAmount">实付金额</th>
+                <th class="sortable" data-key="rule">规则</th>
+                <th>阈值</th>
+                <th>实际值</th>
+                <th>偏离值</th>
+                <th>风险等级</th>
+                <th>风险说明</th>
+              </tr>
+            </thead>
+            <tbody id="detailBody"></tbody>
+          </table>
+          <div class="empty" id="detailEmpty"><strong>暂无明细数据</strong><span>请调整筛选条件后重新查询</span></div>
+        </div>
         <div class="footer-row">
-          <div>共 18 条明细记录，当前显示 1-4 条</div>
+          <div id="detailFooter">共 0 条明细记录</div>
           <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">2</span><span class="page-btn">3</span><span class="page-btn">›</span></div>
         </div>
       </div>
     </section>
   </main>
 
-  <script>
-    const tabs = document.querySelectorAll('.inner-tab');
-    const panels = document.querySelectorAll('.tab-panel');
+  <div class="toast" id="toast"><span>✓</span><span id="toastText">操作成功</span></div>
 
-    tabs.forEach((tab, index) => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(item => item.classList.remove('active'));
-        panels.forEach(panel => panel.classList.remove('active'));
-        tab.classList.add('active');
-        panels[index].classList.add('active');
+  <script>
+    const summaryData = [
+      { id: 1, date: '2026-05-14', store: '北京首都机场T3店', rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', hits: 18, members: 15, items: 11, amount: 1320, level: '中风险', lastTime: '2026-05-14 21:36:18' },
+      { id: 2, date: '2026-05-14', store: '上海浦东机场店', rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', hits: 7, members: 2, items: 6, amount: 860, level: '高风险', lastTime: '2026-05-14 19:08:42' },
+      { id: 3, date: '2026-05-14', store: '广州白云机场店', rule: '重点品类销售低于规则阈值', threshold: '重点品类数量 < 3件', hits: 12, members: 10, items: 4, amount: 2410, level: '低风险', lastTime: '2026-05-14 17:26:09' },
+      { id: 4, date: '2026-05-14', store: '三亚国际免税城A区店', rule: '门店日销售低于规模阈值', threshold: '日销售额 < 30,000元', hits: 1, members: 36, items: 42, amount: 26580, level: '中风险', lastTime: '2026-05-14 22:10:55' },
+      { id: 5, date: '2026-05-13', store: '北京首都机场T3店', rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', hits: 5, members: 1, items: 5, amount: 490, level: '高风险', lastTime: '2026-05-13 20:18:20' }
+    ];
+
+    const detailData = [
+      { date: '2026-05-14', time: '10:23:15', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140001', pos: 'POS-03', cashier: '王某', member: 'M00129', sku: 'SKU100238', product: '香化商品A', category: '香化', qty: 1, saleAmount: 88, paidAmount: 68, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '68元', deviation: '-32元', level: '中风险', desc: '单笔实付金额低于规模阈值' },
+      { date: '2026-05-14', time: '11:05:42', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140078', pos: 'POS-08', cashier: '李某', member: 'M00887', sku: 'SKU330876', product: '食品商品B', category: '食品', qty: 1, saleAmount: 95, paidAmount: 95, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '95元', deviation: '-5元', level: '低风险', desc: '单笔实付金额接近阈值下限' },
+      { date: '2026-05-14', time: '14:18:09', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140321', pos: 'POS-01', cashier: '赵某', member: 'M00256', sku: 'SKU220541', product: '精品商品C', category: '精品', qty: 1, saleAmount: 120, paidAmount: 72, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '72元', deviation: '-28元', level: '中风险', desc: '折扣后实付金额低于规模阈值' },
+      { date: '2026-05-14', time: '21:36:18', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605140886', pos: 'POS-05', cashier: '陈某', member: 'M00918', sku: 'SKU778212', product: '香化商品D', category: '香化', qty: 1, saleAmount: 99, paidAmount: 99, rule: '单笔销售金额低于规模阈值', threshold: '实付金额 < 100元', actual: '99元', deviation: '-1元', level: '低风险', desc: '单笔实付金额低于阈值' },
+      { date: '2026-05-14', time: '19:08:42', code: 'SH-PD-002', store: '上海浦东机场店', receipt: 'XS202605140712', pos: 'POS-06', cashier: '周某', member: 'M00666', sku: 'SKU120088', product: '食品商品E', category: '食品', qty: 1, saleAmount: 86, paidAmount: 86, rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', actual: '6笔', deviation: '+1笔', level: '高风险', desc: '同一会员当日多次低额消费' },
+      { date: '2026-05-14', time: '17:26:09', code: 'GZ-BY-003', store: '广州白云机场店', receipt: 'XS202605140603', pos: 'POS-02', cashier: '吴某', member: 'M00321', sku: 'SKU908711', product: '重点品类商品F', category: '重点品类', qty: 2, saleAmount: 210, paidAmount: 210, rule: '重点品类销售低于规则阈值', threshold: '重点品类数量 < 3件', actual: '2件', deviation: '-1件', level: '低风险', desc: '重点品类销售数量低于规则阈值' },
+      { date: '2026-05-14', time: '22:10:55', code: 'SY-A-004', store: '三亚国际免税城A区店', receipt: 'DAY20260514001', pos: '-', cashier: '-', member: '-', sku: '-', product: '门店日销售汇总', category: '全品类', qty: 42, saleAmount: 26580, paidAmount: 26580, rule: '门店日销售低于规模阈值', threshold: '日销售额 < 30,000元', actual: '26,580元', deviation: '-3,420元', level: '中风险', desc: '门店日销售额低于规模阈值' },
+      { date: '2026-05-13', time: '20:18:20', code: 'BJ-T3-001', store: '北京首都机场T3店', receipt: 'XS202605130488', pos: 'POS-04', cashier: '刘某', member: 'M00129', sku: 'SKU300287', product: '食品商品G', category: '食品', qty: 1, saleAmount: 98, paidAmount: 98, rule: '同一会员日内多笔低额消费', threshold: '低额订单 ≥ 5笔/日', actual: '5笔', deviation: '0笔', level: '高风险', desc: '同一会员达到日内低额订单阈值' }
+    ];
+
+    const state = {
+      stores: ['全部门店'],
+      rule: '全部规则',
+      threshold: '全部阈值',
+      startDate: '2026-05-01',
+      endDate: '2026-05-14',
+      selectedSummary: null,
+      sort: { table: null, key: null, dir: 'asc' }
+    };
+
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => Array.from(document.querySelectorAll(selector));
+    const formatNumber = value => Number(value).toLocaleString('zh-CN', { maximumFractionDigits: 0 });
+    const formatMoney = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const levelClass = level => level === '高风险' ? 'high' : level === '中风险' ? 'mid' : 'low';
+    const escapeHtml = value => String(value).replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+
+    function showToast(text) {
+      $('#toastText').textContent = text;
+      $('#toast').classList.add('show');
+      setTimeout(() => $('#toast').classList.remove('show'), 1800);
+    }
+
+    function getSelectedStores() {
+      if (state.stores.includes('全部门店')) return [];
+      return state.stores;
+    }
+
+    function inDateRange(item) {
+      return item.date >= state.startDate && item.date <= state.endDate;
+    }
+
+    function applyFilters(data) {
+      const selectedStores = getSelectedStores();
+      return data.filter(item => {
+        const storeOk = selectedStores.length === 0 || selectedStores.includes(item.store);
+        const ruleOk = state.rule === '全部规则' || item.rule === state.rule;
+        const thresholdOk = state.threshold === '全部阈值' || item.threshold === state.threshold;
+        return inDateRange(item) && storeOk && ruleOk && thresholdOk;
       });
-    });
+    }
+
+    function sortRows(rows, tableName) {
+      if (state.sort.table !== tableName || !state.sort.key) return rows;
+      const { key, dir } = state.sort;
+      return [...rows].sort((a, b) => {
+        const av = a[key];
+        const bv = b[key];
+        const result = typeof av === 'number' && typeof bv === 'number'
+          ? av - bv
+          : String(av).localeCompare(String(bv), 'zh-CN');
+        return dir === 'asc' ? result : -result;
+      });
+    }
+
+    function getSummaryRows() {
+      return sortRows(applyFilters(summaryData), 'summaryTable');
+    }
+
+    function getDetailRows() {
+      let rows = applyFilters(detailData);
+      if (state.selectedSummary) {
+        rows = rows.filter(item => item.store === state.selectedSummary.store && item.rule === state.selectedSummary.rule && item.threshold === state.selectedSummary.threshold);
+      }
+      return sortRows(rows, 'detailTable');
+    }
+
+    function renderMetrics(summaryRows, detailRows) {
+      const stores = new Set(summaryRows.map(item => item.store));
+      const rules = new Set(summaryRows.map(item => item.rule));
+      const hits = summaryRows.reduce((sum, item) => sum + item.hits, 0);
+      const amount = summaryRows.reduce((sum, item) => sum + item.amount, 0);
+
+      $('#storeMetric').textContent = stores.size;
+      $('#ruleMetric').textContent = rules.size;
+      $('#hitMetric').textContent = formatNumber(hits);
+      $('#amountMetric').textContent = formatNumber(amount);
+      $('#summaryBadge').textContent = summaryRows.length;
+      $('#detailBadge').textContent = detailRows.length;
+    }
+
+    function renderSummary() {
+      const rows = getSummaryRows();
+      const body = $('#summaryBody');
+      body.innerHTML = rows.map((row, index) => `
+        <tr class="${state.selectedSummary && state.selectedSummary.id === row.id ? 'selected' : ''}" data-id="${row.id}">
+          <td class="center">${index + 1}</td>
+          <td>${row.date}</td>
+          <td>${escapeHtml(row.store)}</td>
+          <td>${escapeHtml(row.rule)}</td>
+          <td>${escapeHtml(row.threshold)}</td>
+          <td class="num">${formatNumber(row.hits)}</td>
+          <td class="num">${formatNumber(row.members)}</td>
+          <td class="num">${formatNumber(row.items)}</td>
+          <td class="num">${formatMoney(row.amount)}</td>
+          <td><span class="tag ${levelClass(row.level)}">${row.level}</span></td>
+          <td>${row.lastTime}</td>
+        </tr>
+      `).join('');
+
+      $('#summaryEmpty').classList.toggle('show', rows.length === 0);
+      $('#summaryTable').style.display = rows.length ? 'table' : 'none';
+      $('#summaryFooter').textContent = `共 ${rows.length} 条汇总记录`;
+
+      $$('#summaryBody tr').forEach(tr => {
+        tr.addEventListener('click', () => {
+          const row = summaryData.find(item => item.id === Number(tr.dataset.id));
+          state.selectedSummary = row;
+          $('#detailTip').textContent = `当前展示：${row.store}｜${row.rule}｜${row.threshold}`;
+          switchTab('detailPanel');
+          render();
+        });
+      });
+    }
+
+    function renderDetail() {
+      const rows = getDetailRows();
+      const body = $('#detailBody');
+      body.innerHTML = rows.map((row, index) => `
+        <tr>
+          <td class="center">${index + 1}</td>
+          <td>${row.date}</td>
+          <td>${row.time}</td>
+          <td>${row.code}</td>
+          <td>${escapeHtml(row.store)}</td>
+          <td><span class="link">${row.receipt}</span></td>
+          <td>${row.pos}</td>
+          <td>${row.cashier}</td>
+          <td>${row.member}</td>
+          <td>${row.sku}</td>
+          <td>${escapeHtml(row.product)}</td>
+          <td>${row.category}</td>
+          <td class="num">${formatNumber(row.qty)}</td>
+          <td class="num">${formatMoney(row.saleAmount)}</td>
+          <td class="num">${formatMoney(row.paidAmount)}</td>
+          <td>${escapeHtml(row.rule)}</td>
+          <td>${escapeHtml(row.threshold)}</td>
+          <td>${escapeHtml(row.actual)}</td>
+          <td>${escapeHtml(row.deviation)}</td>
+          <td><span class="tag ${levelClass(row.level)}">${row.level}</span></td>
+          <td>${escapeHtml(row.desc)}</td>
+        </tr>
+      `).join('');
+
+      $('#detailEmpty').classList.toggle('show', rows.length === 0);
+      $('#detailTable').style.display = rows.length ? 'table' : 'none';
+      $('#detailFooter').textContent = `共 ${rows.length} 条明细记录`;
+    }
+
+    function renderSortState() {
+      $$('th.sortable').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
+      if (!state.sort.key) return;
+      const activePanel = $('.tab-panel.active');
+      const th = activePanel.querySelector(`th.sortable[data-key="${state.sort.key}"]`);
+      if (th) th.classList.add(state.sort.dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+    }
+
+    function render() {
+      const summaryRows = getSummaryRows();
+      const detailRows = getDetailRows();
+      renderSummary();
+      renderDetail();
+      renderMetrics(summaryRows, detailRows);
+      renderSortState();
+    }
+
+    function switchTab(panelId) {
+      $$('.inner-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === panelId));
+      $$('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === panelId));
+      state.sort.table = panelId === 'summaryPanel' ? 'summaryTable' : 'detailTable';
+      renderSortState();
+    }
+
+    function syncStoreChip() {
+      const chip = $('#storeChip');
+      if (state.stores.includes('全部门店') || state.stores.length === 0) {
+        chip.textContent = '全部门店';
+        state.stores = ['全部门店'];
+      } else if (state.stores.length === 1) {
+        chip.textContent = state.stores[0];
+      } else {
+        chip.textContent = `已选 ${state.stores.length} 个门店`;
+      }
+    }
+
+    function bindEvents() {
+      $$('.inner-tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+      $('#storeTrigger').addEventListener('click', event => {
+        event.stopPropagation();
+        $('#storeDropdown').classList.toggle('open');
+      });
+
+      document.addEventListener('click', () => $('#storeDropdown').classList.remove('open'));
+      $('#storeDropdown .dropdown-menu').addEventListener('click', event => event.stopPropagation());
+
+      $$('#storeDropdown input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', () => {
+          const allInput = $('#storeDropdown input[value="全部门店"]');
+          if (input.value === '全部门店' && input.checked) {
+            $$('#storeDropdown input[type="checkbox"]').forEach(item => item.checked = item.value === '全部门店');
+          } else if (input.value !== '全部门店' && input.checked) {
+            allInput.checked = false;
+          }
+
+          const checked = $$('#storeDropdown input[type="checkbox"]:checked').map(item => item.value);
+          state.stores = checked.length ? checked : ['全部门店'];
+          if (checked.length === 0) allInput.checked = true;
+          syncStoreChip();
+        });
+      });
+
+      $('#storeSearch').addEventListener('input', event => {
+        const keyword = event.target.value.trim();
+        $$('#storeDropdown .option').forEach(option => {
+          option.style.display = option.textContent.includes(keyword) ? 'flex' : 'none';
+        });
+      });
+
+      $('#queryBtn').addEventListener('click', () => {
+        state.startDate = $('#startDate').value;
+        state.endDate = $('#endDate').value;
+        state.rule = $('#ruleSelect').value;
+        state.threshold = $('#thresholdSelect').value;
+        state.selectedSummary = null;
+        $('#detailTip').textContent = '展示当前筛选条件下的销售风险明细';
+        render();
+        showToast('查询完成，报表数据已刷新');
+      });
+
+      $('#resetBtn').addEventListener('click', () => {
+        $('#startDate').value = '2026-05-01';
+        $('#endDate').value = '2026-05-14';
+        $('#ruleSelect').value = '全部规则';
+        $('#thresholdSelect').value = '全部阈值';
+        $$('#storeDropdown input[type="checkbox"]').forEach(item => item.checked = item.value === '全部门店');
+        Object.assign(state, {
+          stores: ['全部门店'],
+          rule: '全部规则',
+          threshold: '全部阈值',
+          startDate: '2026-05-01',
+          endDate: '2026-05-14',
+          selectedSummary: null,
+          sort: { table: null, key: null, dir: 'asc' }
+        });
+        syncStoreChip();
+        $('#detailTip').textContent = '展示当前筛选条件下的销售风险明细';
+        render();
+        showToast('筛选条件已重置');
+      });
+
+      $('#ruleSelect').addEventListener('change', event => {
+        const mapping = {
+          '单笔销售金额低于规模阈值': '实付金额 < 100元',
+          '同一会员日内多笔低额消费': '低额订单 ≥ 5笔/日',
+          '重点品类销售低于规则阈值': '重点品类数量 < 3件',
+          '门店日销售低于规模阈值': '日销售额 < 30,000元'
+        };
+        if (mapping[event.target.value]) $('#thresholdSelect').value = mapping[event.target.value];
+      });
+
+      $$('.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const table = th.closest('table').id;
+          const key = th.dataset.key;
+          if (state.sort.table === table && state.sort.key === key) {
+            state.sort.dir = state.sort.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            state.sort = { table, key, dir: 'asc' };
+          }
+          render();
+        });
+      });
+
+      $('#exportBtn').addEventListener('click', () => {
+        const active = $('.inner-tab.active').textContent.trim();
+        showToast(`${active}数据已加入导出队列`);
+      });
+
+      $('#refreshBtn').addEventListener('click', () => {
+        $('#updateTime').textContent = `数据更新时间：${new Date().toLocaleString('zh-CN', { hour12: false })}`;
+        showToast('数据已刷新');
+      });
+    }
+
+    bindEvents();
+    syncStoreChip();
+    render();
   </script>
 </body>
 </html>
