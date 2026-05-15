@@ -800,9 +800,6 @@
                 <th>阈值</th>
                 <th>汇总值</th>
                 <th class="num">命中笔数</th>
-                <th class="num">涉及会员数</th>
-                <th class="num">涉及商品数</th>
-                <th class="num">风险销售金额</th>
                 <th>风险等级</th>
               </tr>
             </thead>
@@ -828,8 +825,7 @@
                 <th style="width: 60px;" class="center">序号</th>
                 <th>销售日期</th>
                 <th>销售时间</th>
-                <th>门店编码</th>
-                <th>门店名称</th>
+                <th>门店</th>
                 <th>规则ID</th>
                 <th>规则名称</th>
                 <th>单据号</th>
@@ -957,7 +953,6 @@
     const detailData = detailProfiles.map((item, index) => ({
       id: index + 1,
       ...item,
-      storeCode: extractStoreCode(item.store),
       ruleName: ruleMap[item.ruleId].name,
       ruleContent: ruleMap[item.ruleId].content,
       threshold: ruleMap[item.ruleId].threshold,
@@ -1061,9 +1056,6 @@
           <td class="wide-text" title="${escapeHtml(row.threshold)}">${escapeHtml(row.threshold)}</td>
           <td>${escapeHtml(row.actual)}</td>
           <td class="num">${formatNumber(row.hits)}</td>
-          <td class="num">${formatNumber(row.members)}</td>
-          <td class="num">${formatNumber(row.items)}</td>
-          <td class="num">${formatMoney(row.amount)}</td>
           <td><span class="tag ${levelClass(row.level)}">${row.level}</span></td>
         </tr>
       `).join('');
@@ -1091,7 +1083,6 @@
           <td class="center">${index + 1}</td>
           <td>${row.date}</td>
           <td>${row.time}</td>
-          <td>${row.storeCode}</td>
           <td>${escapeHtml(row.store)}</td>
           <td>${row.ruleId}</td>
           <td>${escapeHtml(row.ruleName)}</td>
