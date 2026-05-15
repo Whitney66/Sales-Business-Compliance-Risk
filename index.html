@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>销售业务合规风险（合规以下）</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", Arial, sans-serif;
+      color: #1f2d3d;
+      background: #f3f6fb;
+      font-size: 14px;
+    }
+
+    .topbar {
+      height: 64px;
+      background: #2f73e8;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 300px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: conic-gradient(#ff7b54, #ffd166, #29b36a, #3a86ff, #8e44ad, #ff7b54);
+    }
+
+    .nav {
+      display: flex;
+      height: 100%;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .nav-item {
+      height: 64px;
+      min-width: 126px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.92);
+      position: relative;
+    }
+
+    .nav-item.active {
+      color: #1f5ecf;
+      background: #fff;
+    }
+
+    .nav-item.active::after {
+      content: "";
+      position: absolute;
+      right: -20px;
+      bottom: 0;
+      border-left: 20px solid #fff;
+      border-top: 64px solid transparent;
+    }
+
+    .search {
+      width: 280px;
+      height: 38px;
+      border-radius: 10px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      color: #b6c0cc;
+      margin-right: 20px;
+    }
+
+    .search span:first-child {
+      flex: 1;
+    }
+
+    .icons {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 24px;
+    }
+
+    .avatar {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #fff;
+      color: #b07738;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .tabs {
+      height: 48px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 22px;
+      gap: 8px;
+      box-shadow: 0 1px 5px rgba(31, 45, 61, 0.18);
+    }
+
+    .tab {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      border: 1px solid #d4dbe6;
+      border-radius: 5px;
+      padding: 0 12px;
+      color: #4d5f73;
+      background: #fff;
+    }
+
+    .tab.active {
+      color: #fff;
+      background: #2487e8;
+      border-color: #2487e8;
+    }
+
+    .toolbar {
+      height: 50px;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-bottom: 1px solid #e4e9f2;
+      padding: 0 20px;
+      gap: 20px;
+    }
+
+    .export {
+      color: #303d4f;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+
+    .page {
+      padding: 14px 18px 24px;
+    }
+
+    .filter-card,
+    .panel {
+      background: #fff;
+      border: 1px solid #e7ebf3;
+      box-shadow: 0 1px 4px rgba(31, 45, 61, 0.06);
+    }
+
+    .filter-card {
+      padding: 18px 20px 8px;
+      margin-bottom: 14px;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 14px 26px;
+    }
+
+    .field {
+      display: grid;
+      grid-template-columns: 86px 1fr;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .field label {
+      color: #5f6f85;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .input,
+    .select {
+      height: 34px;
+      border: 1px solid #d8dee9;
+      border-radius: 4px;
+      padding: 0 10px;
+      color: #2f3e52;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filter-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .btn {
+      height: 34px;
+      border-radius: 4px;
+      border: 1px solid #cfd8e6;
+      padding: 0 18px;
+      background: #fff;
+      color: #2f3e52;
+      cursor: pointer;
+    }
+
+    .btn.primary {
+      background: #2487e8;
+      color: #fff;
+      border-color: #2487e8;
+    }
+
+    .panel {
+      margin-bottom: 14px;
+    }
+
+    .panel-header {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      border-bottom: 1px solid #e6ebf3;
+      background: #fbfcff;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #24364b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 18px;
+      background: #2487e8;
+      border-radius: 2px;
+    }
+
+    .panel-tip {
+      color: #7a8ba0;
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 1180px;
+    }
+
+    th,
+    td {
+      height: 42px;
+      padding: 0 12px;
+      border-right: 1px solid #edf1f7;
+      border-bottom: 1px solid #edf1f7;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    th {
+      color: #34465c;
+      background: #eef3fa;
+      font-weight: 700;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #fbfcff;
+    }
+
+    tbody tr:hover {
+      background: #eaf4ff;
+    }
+
+    .summary-table tbody tr:first-child {
+      background: #f3f8ff;
+      outline: 1px solid #7db7f3;
+    }
+
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .tag.high {
+      color: #d93025;
+      background: #fdeceb;
+    }
+
+    .tag.mid {
+      color: #bd6b00;
+      background: #fff3dc;
+    }
+
+    .tag.low {
+      color: #1f7a3a;
+      background: #e8f6ed;
+    }
+
+    .link {
+      color: #237be8;
+      cursor: pointer;
+    }
+
+    .footer-row {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      color: #6e7f94;
+      border-top: 1px solid #edf1f7;
+      background: #fff;
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .page-btn {
+      min-width: 28px;
+      height: 28px;
+      border: 1px solid #d8dee9;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+
+    .page-btn.active {
+      background: #2487e8;
+      border-color: #2487e8;
+      color: #fff;
+    }
+
+    @media (max-width: 1280px) {
+      .filter-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+      }
+
+      .brand {
+        min-width: 240px;
+      }
+
+      .nav-item {
+        min-width: 100px;
+        padding: 0 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>大数据平台</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-item">进销存分析</div>
+      <div class="nav-item">库存分析</div>
+      <div class="nav-item">顾客分析</div>
+      <div class="nav-item">采购分析</div>
+      <div class="nav-item">提货分析</div>
+      <div class="nav-item active">风险管控</div>
+      <div class="nav-item">离线分析</div>
+    </nav>
+    <div class="search"><span>搜索</span><span>⌕</span></div>
+    <div class="icons">
+      <span>▣</span>
+      <span>♢</span>
+      <span>⛶</span>
+      <div class="avatar">cdf</div>
+    </div>
+  </header>
+
+  <section class="tabs">
+    <div class="tab">经营看板 ×</div>
+    <div class="tab active">销售业务合规风险（合规以下） ×</div>
+  </section>
+
+  <section class="toolbar">
+    <div class="export">⇱ 导出</div>
+  </section>
+
+  <main class="page">
+    <section class="filter-card">
+      <div class="filter-grid">
+        <div class="field">
+          <label>业务日期</label>
+          <div class="input">2026-05-14</div>
+        </div>
+        <div class="field">
+          <label>门店</label>
+          <div class="select">全部门店 <span>⌄</span></div>
+        </div>
+        <div class="field">
+          <label>规则</label>
+          <div class="select">全部规则 <span>⌄</span></div>
+        </div>
+        <div class="field">
+          <label>风险等级</label>
+          <div class="select">全部 <span>⌄</span></div>
+        </div>
+        <div class="field">
+          <label>单据号</label>
+          <div class="input">请输入单据号</div>
+        </div>
+        <div class="field">
+          <label>会员编号</label>
+          <div class="input">请输入会员编号</div>
+        </div>
+        <div class="field">
+          <label>商品编码</label>
+          <div class="input">请输入商品编码</div>
+        </div>
+        <div class="field">
+          <label>是否命中</label>
+          <div class="select">是 <span>⌄</span></div>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="btn primary">查询</button>
+        <button class="btn">重置</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">销售业务合规风险汇总</div>
+        <div class="panel-tip">日表｜按“门店 + 规则 + 阈值”汇总，点击汇总行联动下方明细</div>
+      </div>
+      <div class="table-wrap">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th style="width: 60px;" class="center">序号</th>
+              <th>业务日期</th>
+              <th>门店</th>
+              <th>规则</th>
+              <th>阈值</th>
+              <th class="num">命中笔数</th>
+              <th class="num">涉及会员数</th>
+              <th class="num">涉及商品数</th>
+              <th class="num">风险销售金额</th>
+              <th>风险等级</th>
+              <th>最近触发时间</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="center">1</td>
+              <td>2026-05-14</td>
+              <td>北京首都机场T3店</td>
+              <td>单笔销售金额低于合规阈值</td>
+              <td>实付金额 &lt; 100元</td>
+              <td class="num">18</td>
+              <td class="num">15</td>
+              <td class="num">11</td>
+              <td class="num">1,320.00</td>
+              <td><span class="tag mid">中风险</span></td>
+              <td>2026-05-14 21:36:18</td>
+            </tr>
+            <tr>
+              <td class="center">2</td>
+              <td>2026-05-14</td>
+              <td>上海浦东机场店</td>
+              <td>同一会员日内多笔低额消费</td>
+              <td>低额订单 ≥ 5笔/日</td>
+              <td class="num">7</td>
+              <td class="num">2</td>
+              <td class="num">6</td>
+              <td class="num">860.00</td>
+              <td><span class="tag high">高风险</span></td>
+              <td>2026-05-14 19:08:42</td>
+            </tr>
+            <tr>
+              <td class="center">3</td>
+              <td>2026-05-14</td>
+              <td>广州白云机场店</td>
+              <td>重点品类销售低于规则阈值</td>
+              <td>重点品类数量 &lt; 3件</td>
+              <td class="num">12</td>
+              <td class="num">10</td>
+              <td class="num">4</td>
+              <td class="num">2,410.00</td>
+              <td><span class="tag low">低风险</span></td>
+              <td>2026-05-14 17:26:09</td>
+            </tr>
+            <tr>
+              <td class="center">4</td>
+              <td>2026-05-14</td>
+              <td>三亚国际免税城A区店</td>
+              <td>门店日销售低于合规阈值</td>
+              <td>日销售额 &lt; 30,000元</td>
+              <td class="num">1</td>
+              <td class="num">36</td>
+              <td class="num">42</td>
+              <td class="num">26,580.00</td>
+              <td><span class="tag mid">中风险</span></td>
+              <td>2026-05-14 22:10:55</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer-row">
+        <div>共 4 条汇总记录</div>
+        <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">›</span></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div class="panel-title">销售业务合规风险明细</div>
+        <div class="panel-tip">当前展示：北京首都机场T3店｜单笔销售金额低于合规阈值｜实付金额 &lt; 100元</div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 60px;" class="center">序号</th>
+              <th>业务日期</th>
+              <th>销售时间</th>
+              <th>门店编码</th>
+              <th>门店名称</th>
+              <th>单据号</th>
+              <th>POS机号</th>
+              <th>收银员</th>
+              <th>会员编号</th>
+              <th>商品编码</th>
+              <th>商品名称</th>
+              <th>品类</th>
+              <th class="num">销售数量</th>
+              <th class="num">销售金额</th>
+              <th class="num">实付金额</th>
+              <th>规则</th>
+              <th>阈值</th>
+              <th>实际值</th>
+              <th>偏离值</th>
+              <th>风险等级</th>
+              <th>风险说明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="center">1</td>
+              <td>2026-05-14</td>
+              <td>10:23:15</td>
+              <td>BJ-T3-001</td>
+              <td>北京首都机场T3店</td>
+              <td><span class="link">XS202605140001</span></td>
+              <td>POS-03</td>
+              <td>王某</td>
+              <td>M00129</td>
+              <td>SKU100238</td>
+              <td>香化商品A</td>
+              <td>香化</td>
+              <td class="num">1</td>
+              <td class="num">88.00</td>
+              <td class="num">68.00</td>
+              <td>单笔销售金额低于合规阈值</td>
+              <td>实付金额 &lt; 100元</td>
+              <td>68元</td>
+              <td>-32元</td>
+              <td><span class="tag mid">中风险</span></td>
+              <td>单笔实付金额低于合规阈值</td>
+            </tr>
+            <tr>
+              <td class="center">2</td>
+              <td>2026-05-14</td>
+              <td>11:05:42</td>
+              <td>BJ-T3-001</td>
+              <td>北京首都机场T3店</td>
+              <td><span class="link">XS202605140078</span></td>
+              <td>POS-08</td>
+              <td>李某</td>
+              <td>M00887</td>
+              <td>SKU330876</td>
+              <td>食品商品B</td>
+              <td>食品</td>
+              <td class="num">1</td>
+              <td class="num">95.00</td>
+              <td class="num">95.00</td>
+              <td>单笔销售金额低于合规阈值</td>
+              <td>实付金额 &lt; 100元</td>
+              <td>95元</td>
+              <td>-5元</td>
+              <td><span class="tag low">低风险</span></td>
+              <td>单笔实付金额接近阈值下限</td>
+            </tr>
+            <tr>
+              <td class="center">3</td>
+              <td>2026-05-14</td>
+              <td>14:18:09</td>
+              <td>BJ-T3-001</td>
+              <td>北京首都机场T3店</td>
+              <td><span class="link">XS202605140321</span></td>
+              <td>POS-01</td>
+              <td>赵某</td>
+              <td>M00256</td>
+              <td>SKU220541</td>
+              <td>精品商品C</td>
+              <td>精品</td>
+              <td class="num">1</td>
+              <td class="num">120.00</td>
+              <td class="num">72.00</td>
+              <td>单笔销售金额低于合规阈值</td>
+              <td>实付金额 &lt; 100元</td>
+              <td>72元</td>
+              <td>-28元</td>
+              <td><span class="tag mid">中风险</span></td>
+              <td>折扣后实付金额低于合规阈值</td>
+            </tr>
+            <tr>
+              <td class="center">4</td>
+              <td>2026-05-14</td>
+              <td>21:36:18</td>
+              <td>BJ-T3-001</td>
+              <td>北京首都机场T3店</td>
+              <td><span class="link">XS202605140886</span></td>
+              <td>POS-05</td>
+              <td>陈某</td>
+              <td>M00918</td>
+              <td>SKU778212</td>
+              <td>香化商品D</td>
+              <td>香化</td>
+              <td class="num">1</td>
+              <td class="num">99.00</td>
+              <td class="num">99.00</td>
+              <td>单笔销售金额低于合规阈值</td>
+              <td>实付金额 &lt; 100元</td>
+              <td>99元</td>
+              <td>-1元</td>
+              <td><span class="tag low">低风险</span></td>
+              <td>单笔实付金额低于阈值</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="footer-row">
+        <div>共 18 条明细记录，当前显示 1-4 条</div>
+        <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">2</span><span class="page-btn">3</span><span class="page-btn">›</span></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
