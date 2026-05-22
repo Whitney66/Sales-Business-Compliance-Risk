@@ -445,6 +445,10 @@
       gap: 4px;
     }
 
+    .inner-tab-actions {
+      margin-left: auto;
+    }
+
     .inner-tab {
       height: 48px;
       display: flex;
@@ -758,8 +762,9 @@
 
     <section class="panel report-panel">
       <div class="inner-tabs">
-        <div class="inner-tab active" data-tab="summaryPanel">汇总值 <span class="badge" id="summaryBadge">0</span></div>
+        <div class="inner-tab active" data-tab="summaryPanel">汇总 <span class="badge" id="summaryBadge">0</span></div>
         <div class="inner-tab" data-tab="detailPanel">明细 <span class="badge" id="detailBadge">0</span></div>
+        <div class="inner-tab-actions"><button class="btn" id="tabExportBtn">导出</button></div>
       </div>
 
       <div class="tab-panel active" id="summaryPanel">
@@ -1324,10 +1329,12 @@
         showToast('筛选条件已重置');
       });
 
-      $('#exportBtn').addEventListener('click', () => {
+      const handleExport = () => {
         const active = $('.inner-tab.active').textContent.trim();
         showToast(`${active}数据已加入导出队列`);
-      });
+      };
+      $('#exportBtn').addEventListener('click', handleExport);
+      $('#tabExportBtn').addEventListener('click', handleExport);
 
       $('#refreshBtn').addEventListener('click', () => {
         $('#updateTime').textContent = `数据更新时间：${new Date().toLocaleString('zh-CN', { hour12: false })}`;
