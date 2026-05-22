@@ -741,38 +741,10 @@
           <select class="select" id="ruleSelect"></select>
         </div>
 
-        <div class="field">
-          <label>阈值</label>
-          <select class="select" id="thresholdSelect"></select>
-        </div>
-
         <div class="btn-group">
           <button class="btn primary" id="queryBtn">查询</button>
           <button class="btn" id="resetBtn">重置</button>
         </div>
-      </div>
-    </section>
-
-    <section class="metrics">
-      <div class="metric-card">
-        <div class="metric-label">命中门店数</div>
-        <div class="metric-value" id="storeMetric">0</div>
-        <div class="metric-extra">当前筛选范围内门店</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">命中规则数</div>
-        <div class="metric-value" id="ruleMetric">0</div>
-        <div class="metric-extra">覆盖规模以下销售规则</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">命中笔数</div>
-        <div class="metric-value" id="hitMetric">0</div>
-        <div class="metric-extra">当前筛选范围内汇总</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">风险销售金额</div>
-        <div class="metric-value" id="amountMetric">0</div>
-        <div class="metric-extra">单位：元</div>
       </div>
     </section>
 
@@ -784,7 +756,6 @@
 
       <div class="tab-panel active" id="summaryPanel">
         <div class="panel-header">
-          <div class="panel-title">销售业务合规风险（规模以下）汇总值</div>
           <div class="panel-tip">按“门店 + 规则ID + 规则名称 + 阈值”汇总，点击行可切换到对应明细</div>
         </div>
         <div class="table-wrap">
@@ -792,7 +763,6 @@
             <thead>
               <tr>
                 <th style="width: 60px;" class="center">序号</th>
-                <th>销售日期</th>
                 <th>门店</th>
                 <th>规则ID</th>
                 <th>规则名称</th>
@@ -815,7 +785,6 @@
 
       <div class="tab-panel" id="detailPanel">
         <div class="panel-header">
-          <div class="panel-title">销售业务合规风险（规模以下）明细</div>
           <div class="panel-tip" id="detailTip">展示当前筛选条件下的销售风险明细</div>
         </div>
         <div class="table-wrap">
@@ -963,7 +932,6 @@
       stores: [...storeCatalog],
       ruleIds: [...allRuleIds],
       ruleName: '全部规则',
-      threshold: '全部阈值',
       startDate: '2026-05-01',
       endDate: '2026-05-14',
       selectedSummary: null
@@ -1011,8 +979,7 @@
         const storeOk = selectedStores.length === 0 || selectedStores.includes(item.store);
         const ruleIdOk = ruleIds.has(item.ruleId);
         const ruleNameOk = state.ruleName === '全部规则' || item.ruleName === state.ruleName;
-        const thresholdOk = state.threshold === '全部阈值' || item.threshold === state.threshold;
-        return inDateRange(item) && storeOk && ruleIdOk && ruleNameOk && thresholdOk;
+        return inDateRange(item) && storeOk && ruleIdOk && ruleNameOk;
       });
     }
 
@@ -1029,15 +996,6 @@
     }
 
     function renderMetrics(summaryRows, detailRows) {
-      const stores = new Set(summaryRows.map(item => item.store));
-      const rules = new Set(summaryRows.map(item => item.ruleId));
-      const hits = summaryRows.reduce((sum, item) => sum + item.hits, 0);
-      const amount = summaryRows.reduce((sum, item) => sum + item.amount, 0);
-
-      $('#storeMetric').textContent = stores.size;
-      $('#ruleMetric').textContent = rules.size;
-      $('#hitMetric').textContent = formatNumber(hits);
-      $('#amountMetric').textContent = formatNumber(amount);
       $('#summaryBadge').textContent = summaryRows.length;
       $('#detailBadge').textContent = detailRows.length;
     }
@@ -1048,7 +1006,6 @@
       body.innerHTML = rows.map((row, index) => `
         <tr class="${state.selectedSummary && state.selectedSummary.id === row.id ? 'selected' : ''}" data-id="${row.id}">
           <td class="center">${index + 1}</td>
-          <td>${row.date}</td>
           <td>${escapeHtml(row.store)}</td>
           <td>${row.ruleId}</td>
           <td>${escapeHtml(row.ruleName)}</td>
@@ -1182,23 +1139,6 @@
       ].join('');
       if (state.ruleName !== '全部规则' && !rules.some(rule => rule.name === state.ruleName)) state.ruleName = '全部规则';
       $('#ruleSelect').value = state.ruleName;
-      updateThresholdOptions();
-    }
-
-    function updateThresholdOptions() {
-      const selected = selectedRuleSet();
-      const thresholds = [];
-      ruleCatalog.forEach(rule => {
-        if (selected.has(rule.id) && (state.ruleName === '全部规则' || state.ruleName === rule.name) && !thresholds.includes(rule.threshold)) {
-          thresholds.push(rule.threshold);
-        }
-      });
-      $('#thresholdSelect').innerHTML = [
-        '<option value="全部阈值">全部阈值</option>',
-        ...thresholds.map(threshold => `<option value="${escapeHtml(threshold)}">${escapeHtml(threshold)}</option>`)
-      ].join('');
-      if (state.threshold !== '全部阈值' && !thresholds.includes(state.threshold)) state.threshold = '全部阈值';
-      $('#thresholdSelect').value = state.threshold;
     }
 
     function syncRuleCheckboxes() {
@@ -1252,7 +1192,6 @@
             if (state.ruleIds.length === 0) state.ruleIds = [...allRuleIds];
           }
           state.ruleName = '全部规则';
-          state.threshold = '全部阈值';
           syncRuleCheckboxes();
           updateRuleSelectOptions();
         });
@@ -1276,24 +1215,10 @@
         state.ruleName = event.target.value;
         if (state.ruleName === '全部规则') {
           state.ruleIds = [...allRuleIds];
-          state.threshold = '全部阈值';
         } else {
           const rule = ruleCatalog.find(item => item.name === state.ruleName);
-          if (rule) {
-            state.ruleIds = [rule.id];
-            state.threshold = rule.threshold;
-          }
+          if (rule) state.ruleIds = [rule.id];
         }
-        syncRuleCheckboxes();
-        updateRuleSelectOptions();
-      });
-
-      $('#thresholdSelect').addEventListener('change', event => {
-        state.threshold = event.target.value;
-        if (state.threshold === '全部阈值') return;
-        const matchedRules = ruleCatalog.filter(rule => rule.threshold === state.threshold);
-        state.ruleIds = matchedRules.map(rule => rule.id);
-        state.ruleName = matchedRules.length === 1 ? matchedRules[0].name : '全部规则';
         syncRuleCheckboxes();
         updateRuleSelectOptions();
       });
@@ -1302,7 +1227,6 @@
         state.startDate = $('#startDate').value;
         state.endDate = $('#endDate').value;
         state.ruleName = $('#ruleSelect').value;
-        state.threshold = $('#thresholdSelect').value;
         state.selectedSummary = null;
         $('#detailTip').textContent = '展示当前筛选条件下的销售风险明细';
         render();
@@ -1316,7 +1240,6 @@
           stores: [...storeCatalog],
           ruleIds: [...allRuleIds],
           ruleName: '全部规则',
-          threshold: '全部阈值',
           startDate: '2026-05-01',
           endDate: '2026-05-14',
           selectedSummary: null
