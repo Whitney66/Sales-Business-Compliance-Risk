@@ -789,30 +789,7 @@
         </div>
         <div class="table-wrap">
           <table id="detailTable">
-            <thead>
-              <tr>
-                <th style="width: 60px;" class="center">序号</th>
-                <th>销售日期</th>
-                <th>销售时间</th>
-                <th>门店</th>
-                <th>规则ID</th>
-                <th>规则名称</th>
-                <th>单据号</th>
-                <th>POS机号</th>
-                <th>收银员</th>
-                <th>证件号</th>
-                <th>商品编码</th>
-                <th>商品名称</th>
-                <th>支付方式</th>
-                <th class="num">销售金额</th>
-                <th class="num">实付金额</th>
-                <th>阈值</th>
-                <th>实际值</th>
-                <th>偏离值</th>
-                <th>风险等级</th>
-                <th>风险说明</th>
-              </tr>
-            </thead>
+            <thead id="detailHead"></thead>
             <tbody id="detailBody"></tbody>
           </table>
           <div class="empty" id="detailEmpty"><strong>暂无明细数据</strong><span>请调整筛选条件后重新查询</span></div>
@@ -858,7 +835,7 @@
     const ruleCatalog = [
       { id: 'C01', name: '同一证件高频购买', content: '同一证件号30天内购买相同商品编码次数≥3次，或单日订单数≥5笔', threshold: '次数阈值：3次/30天；单日订单阈值：5笔', level: '中风险' },
       { id: 'C02', name: '护照、身份信息相同，顾客姓名不同', content: '30天内，同一护照身份信息存在不同顾客姓名，≥2笔', threshold: '次数阈值：≥2次/30天', level: '中低风险' },
-      { id: 'C03', name: '航班信息异常', content: '同一旅客连续离境/入境购物时间存在逻辑错误，两笔订单间隔购买时间≥6小时且≤48小时', threshold: '次数阈值：≥1次/30天', level: '高风险' },
+      { id: 'C03', name: '购买时间异常', content: '同一旅客连续离境/入境购物时间存在逻辑错误，两笔订单间隔购买时间≥6小时且≤48小时', threshold: '次数阈值：≥1次/30天', level: '高风险' },
       { id: 'C04', name: '支付人与证件人不一致', content: '同一支付账号为≥3个不同证件号的订单付款，时间阈值为30天', threshold: '证件数阈值：3个', level: '高风险' },
       { id: 'C05', name: '大额现金结算', content: '单笔订单现金支付金额≥5000元，或同一收银员日现金结算笔数占比＞30%', threshold: '单笔阈值：5000元；现金占比阈值：30%', level: '中风险' },
       { id: 'C06', name: '退货频率异常（笔数）', content: '统计数据月份的总退货笔数≥倒退一年内的月平均退货笔数*1.25', threshold: '比例阀值：5%', level: '中风险' },
@@ -909,8 +886,12 @@
 
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
+    const standardDetailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
+    const payerDetailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '交易卡号、商户订单号、营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
+    const payerDetailRuleNames = new Set(['支付人与证件人不一致']);
 
     const summaryData = summaryProfiles.map((item, index) => ({
+
       id: index + 1,
       ...item,
       ruleName: ruleMap[item.ruleId].name,
@@ -1032,31 +1013,74 @@
       });
     }
 
+    function detailFieldsForRows(rows) {
+      const activeRuleName = rows.length && rows.every(row => row.ruleName === rows[0].ruleName) ? rows[0].ruleName : state.ruleName;
+      return payerDetailRuleNames.has(activeRuleName) ? payerDetailFields : standardDetailFields;
+    }
+
+    function detailValue(row, field, index) {
+      const storeCode = extractStoreCode(row.store);
+      const saleAmount = Math.abs(Number(row.saleAmount));
+      const paidAmount = Math.abs(Number(row.paidAmount));
+      const taxCost = Math.round(saleAmount * 0.72);
+      const noTaxCost = Math.round(taxCost / 1.13);
+      const values = {
+        '序号': index + 1,
+        '柜组': `${storeCode}柜组`,
+        '收银机号': row.pos,
+        '收银员': row.cashier,
+        '小票号': row.receipt,
+        '授权卡号': `AUTH-${String(row.id).padStart(4, '0')}`,
+        '营业员': row.cashier,
+        '交易卡号、商户订单号、营业员': `${row.pay}｜${row.receipt}｜${row.cashier}`,
+        '顾客姓名': `顾客${String.fromCharCode(64 + ((row.id - 1) % 26) + 1)}`,
+        '顾客国籍': '中国',
+        '性别': row.id % 2 ? '女' : '男',
+        '年龄': 26 + (row.id % 18),
+        '证件类型': row.cert.startsWith('P') ? '护照' : '身份证',
+        '护照号': row.cert,
+        '航班号': `CZ${6200 + row.id}`,
+        '商品条码': `69${String(100000000000 + row.id * 137).slice(-11)}`,
+        '商品编码': row.sku,
+        '商品名称': row.product,
+        '供应商': `供应商${String.fromCharCode(64 + ((row.id - 1) % 6) + 1)}`,
+        '厂商货号': `ART-${row.sku.replace(/[^A-Z0-9]/g, '')}`,
+        '品牌': `品牌${String.fromCharCode(64 + ((row.id - 1) % 5) + 1)}`,
+        '大类': row.saleAmount < 0 ? '退货商品' : '免税商品',
+        '中类': row.product.includes('香化') ? '香化' : row.product.includes('酒') ? '酒水' : '精品',
+        '商品类别': row.product.includes('退货') ? '退货类' : '销售类',
+        '数量': row.saleAmount < 0 ? -1 : 1,
+        '含量': '1件',
+        '售价': formatMoney(saleAmount),
+        '售价金额': formatMoney(saleAmount),
+        '交易价格': formatMoney(paidAmount),
+        '成交金额': formatMoney(paidAmount),
+        '含税成本': formatMoney(taxCost),
+        '不含税成本': formatMoney(noTaxCost),
+        '会员折扣': '0.00',
+        '促销折扣': '0.00',
+        '促销折扣分担': '0.00',
+        '促销单号': '-',
+        '临时折扣': row.ruleName === '临时折扣超权限' ? row.deviation : '0.00',
+        '批发分担': '0.00',
+        '折扣分担': '0.00',
+        '满减折扣': '0.00',
+        '满减折扣分担': '0.00',
+        '满减折扣单号': '-',
+        '组包折扣': '0.00'
+      };
+      return values[field] ?? '-';
+    }
+
     function renderDetail() {
       const rows = getDetailRows();
+      const fields = detailFieldsForRows(rows);
+      $('#detailHead').innerHTML = `<tr>${fields.map((field, index) => `<th${index === 0 ? ' style="width: 60px;" class="center"' : ''}>${escapeHtml(field)}</th>`).join('')}</tr>`;
+      $('#detailTable').style.minWidth = `${Math.max(1450, fields.length * 118)}px`;
       const body = $('#detailBody');
       body.innerHTML = rows.map((row, index) => `
         <tr>
-          <td class="center">${index + 1}</td>
-          <td>${row.date}</td>
-          <td>${row.time}</td>
-          <td>${escapeHtml(row.store)}</td>
-          <td>${row.ruleId}</td>
-          <td>${escapeHtml(row.ruleName)}</td>
-          <td><span class="link">${row.receipt}</span></td>
-          <td>${row.pos}</td>
-          <td>${row.cashier}</td>
-          <td>${row.cert}</td>
-          <td>${row.sku}</td>
-          <td>${escapeHtml(row.product)}</td>
-          <td>${row.pay}</td>
-          <td class="num">${formatMoney(row.saleAmount)}</td>
-          <td class="num">${formatMoney(row.paidAmount)}</td>
-          <td class="wide-text" title="${escapeHtml(row.threshold)}">${escapeHtml(row.threshold)}</td>
-          <td>${escapeHtml(row.actual)}</td>
-          <td>${escapeHtml(row.deviation)}</td>
-          <td><span class="tag ${levelClass(row.level)}">${row.level}</span></td>
-          <td class="wide-text" title="${escapeHtml(row.desc)}">${escapeHtml(row.desc)}</td>
+          ${fields.map((field, fieldIndex) => `<td class="${fieldIndex === 0 ? 'center' : ''}">${escapeHtml(detailValue(row, field, index))}</td>`).join('')}
         </tr>
       `).join('');
 
