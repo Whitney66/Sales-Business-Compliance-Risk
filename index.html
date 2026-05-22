@@ -1168,10 +1168,7 @@
       $('#ruleIdOptions').innerHTML = [
         `<label class="option"><input type="checkbox" value="全部规则ID" checked /><span>全部规则ID</span></label>`,
         ...ruleCatalog.map(rule => `
-          <label class="option">
-            <input type="checkbox" value="${rule.id}" checked />
-            <span class="option-text"><strong>${rule.id}</strong><span class="option-sub">${escapeHtml(rule.name)}</span></span>
-          </label>
+          <label class="option"><input type="checkbox" value="${rule.id}" checked /><span>${rule.id}</span></label>
         `)
       ].join('');
     }
@@ -1182,10 +1179,7 @@
       $('#ruleNameOptions').innerHTML = [
         `<label class="option"><input type="checkbox" value="全部规则" checked /><span>全部规则</span></label>`,
         ...rules.map(rule => `
-          <label class="option">
-            <input type="checkbox" value="${escapeHtml(rule.name)}" checked />
-            <span class="option-text"><strong>${rule.id}</strong><span class="option-sub">${escapeHtml(rule.name)}</span></span>
-          </label>
+          <label class="option"><input type="checkbox" value="${escapeHtml(rule.name)}" checked /><span>${escapeHtml(rule.name)}</span></label>
         `)
       ].join('');
       state.ruleNames = allRuleNames.filter(name => rules.some(rule => rule.name === name) && state.ruleNames.includes(name));
@@ -1233,8 +1227,6 @@
             else selected.delete(input.value);
             state.ruleNames = availableRules.map(rule => rule.name).filter(name => selected.has(name));
           }
-          state.ruleIds = state.ruleNames.length ? ruleCatalog.filter(rule => state.ruleNames.includes(rule.name)).map(rule => rule.id) : [...allRuleIds];
-          syncRuleCheckboxes();
           syncRuleNameCheckboxes();
         });
       });
