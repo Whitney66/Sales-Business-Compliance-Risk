@@ -736,9 +736,17 @@
           </div>
         </div>
 
-        <div class="field">
+        <div class="field dropdown" id="ruleNameDropdown">
           <label>规则名称</label>
-          <select class="select" id="ruleSelect"></select>
+          <div class="select dropdown-trigger" id="ruleNameTrigger">
+            <span class="chip" id="ruleNameChip">全部规则</span>
+            <span class="select-placeholder">下拉多选</span>
+            <span class="select-arrow">⌄</span>
+          </div>
+          <div class="dropdown-menu" id="ruleNameMenu">
+            <input class="option-search" id="ruleNameSearch" placeholder="搜索规则名称" />
+            <div id="ruleNameOptions"></div>
+          </div>
         </div>
 
         <div class="btn-group">
@@ -886,6 +894,7 @@
 
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
+    const allRuleNames = ruleCatalog.map(rule => rule.name);
     const standardDetailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
     const payerDetailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '交易卡号、商户订单号、营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
     const payerDetailRuleNames = new Set(['支付人与证件人不一致']);
@@ -912,7 +921,7 @@
     const state = {
       stores: [...storeCatalog],
       ruleIds: [...allRuleIds],
-      ruleName: '全部规则',
+      ruleNames: [...allRuleNames],
       startDate: '2026-05-01',
       endDate: '2026-05-14',
       selectedSummary: null
@@ -959,7 +968,7 @@
       return data.filter(item => {
         const storeOk = selectedStores.length === 0 || selectedStores.includes(item.store);
         const ruleIdOk = ruleIds.has(item.ruleId);
-        const ruleNameOk = state.ruleName === '全部规则' || item.ruleName === state.ruleName;
+        const ruleNameOk = state.ruleNames.length === allRuleNames.length || state.ruleNames.includes(item.ruleName);
         return inDateRange(item) && storeOk && ruleIdOk && ruleNameOk;
       });
     }
@@ -1014,7 +1023,7 @@
     }
 
     function detailFieldsForRows(rows) {
-      const activeRuleName = rows.length && rows.every(row => row.ruleName === rows[0].ruleName) ? rows[0].ruleName : state.ruleName;
+      const activeRuleName = rows.length && rows.every(row => row.ruleName === rows[0].ruleName) ? rows[0].ruleName : '';
       return payerDetailRuleNames.has(activeRuleName) ? payerDetailFields : standardDetailFields;
     }
 
@@ -1126,6 +1135,19 @@
       }
     }
 
+    function syncRuleNameChip() {
+      const chip = $('#ruleNameChip');
+      if (state.ruleNames.length === allRuleNames.length) {
+        chip.textContent = '全部规则';
+      } else if (state.ruleNames.length === 1) {
+        chip.textContent = state.ruleNames[0];
+      } else if (state.ruleNames.length === 0) {
+        chip.textContent = '未选择规则';
+      } else {
+        chip.textContent = `已选 ${state.ruleNames.length} 个规则`;
+      }
+    }
+
     function renderStoreOptions() {
       $('#storeOptions').innerHTML = [
         `<label class="option"><input type="checkbox" value="全部门店" checked /><span>全部门店</span></label>`,
@@ -1154,15 +1176,21 @@
       ].join('');
     }
 
-    function updateRuleSelectOptions() {
+    function renderRuleNameOptions() {
       const selected = selectedRuleSet();
       const rules = ruleCatalog.filter(rule => selected.has(rule.id));
-      $('#ruleSelect').innerHTML = [
-        '<option value="全部规则">全部规则</option>',
-        ...rules.map(rule => `<option value="${escapeHtml(rule.name)}">${rule.id}｜${escapeHtml(rule.name)}</option>`)
+      $('#ruleNameOptions').innerHTML = [
+        `<label class="option"><input type="checkbox" value="全部规则" checked /><span>全部规则</span></label>`,
+        ...rules.map(rule => `
+          <label class="option">
+            <input type="checkbox" value="${escapeHtml(rule.name)}" checked />
+            <span class="option-text"><strong>${rule.id}</strong><span class="option-sub">${escapeHtml(rule.name)}</span></span>
+          </label>
+        `)
       ].join('');
-      if (state.ruleName !== '全部规则' && !rules.some(rule => rule.name === state.ruleName)) state.ruleName = '全部规则';
-      $('#ruleSelect').value = state.ruleName;
+      state.ruleNames = allRuleNames.filter(name => rules.some(rule => rule.name === name) && state.ruleNames.includes(name));
+      if (state.ruleNames.length === 0) state.ruleNames = rules.map(rule => rule.name);
+      syncRuleNameCheckboxes();
     }
 
     function syncRuleCheckboxes() {
@@ -1171,6 +1199,16 @@
         input.checked = input.value === '全部规则ID' ? state.ruleIds.length === allRuleIds.length : selected.has(input.value);
       });
       syncRuleIdChip();
+    }
+
+    function syncRuleNameCheckboxes() {
+      const selected = new Set(state.ruleNames);
+      const selectedRuleNames = ruleCatalog.filter(rule => selectedRuleSet().has(rule.id)).map(rule => rule.name);
+      const isAllSelected = selectedRuleNames.length > 0 && selectedRuleNames.every(name => selected.has(name));
+      $$('#ruleNameDropdown input[type="checkbox"]').forEach(input => {
+        input.checked = input.value === '全部规则' ? isAllSelected : selected.has(input.value);
+      });
+      syncRuleNameChip();
     }
 
     function bindDropdown(dropdownId, triggerId) {
@@ -1183,10 +1221,30 @@
       dropdown.querySelector('.dropdown-menu').addEventListener('click', event => event.stopPropagation());
     }
 
+    function bindRuleNameCheckboxEvents() {
+      $$('#ruleNameDropdown input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', () => {
+          const availableRules = ruleCatalog.filter(rule => state.ruleIds.includes(rule.id));
+          if (input.value === '全部规则') {
+            state.ruleNames = input.checked ? availableRules.map(rule => rule.name) : [];
+          } else {
+            const selected = new Set(state.ruleNames);
+            if (input.checked) selected.add(input.value);
+            else selected.delete(input.value);
+            state.ruleNames = availableRules.map(rule => rule.name).filter(name => selected.has(name));
+          }
+          state.ruleIds = state.ruleNames.length ? ruleCatalog.filter(rule => state.ruleNames.includes(rule.name)).map(rule => rule.id) : [...allRuleIds];
+          syncRuleCheckboxes();
+          syncRuleNameCheckboxes();
+        });
+      });
+    }
+
     function bindEvents() {
       $$('.inner-tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
       bindDropdown('#storeDropdown', '#storeTrigger');
       bindDropdown('#ruleIdDropdown', '#ruleIdTrigger');
+      bindDropdown('#ruleNameDropdown', '#ruleNameTrigger');
       document.addEventListener('click', () => $$('.dropdown').forEach(item => item.classList.remove('open')));
 
       $$('#storeDropdown input[type="checkbox"]').forEach(input => {
@@ -1215,9 +1273,10 @@
               .filter(value => value !== '全部规则ID');
             if (state.ruleIds.length === 0) state.ruleIds = [...allRuleIds];
           }
-          state.ruleName = '全部规则';
+          state.ruleNames = ruleCatalog.filter(rule => state.ruleIds.includes(rule.id)).map(rule => rule.name);
           syncRuleCheckboxes();
-          updateRuleSelectOptions();
+          renderRuleNameOptions();
+          bindRuleNameCheckboxEvents();
         });
       });
 
@@ -1235,22 +1294,18 @@
         });
       });
 
-      $('#ruleSelect').addEventListener('change', event => {
-        state.ruleName = event.target.value;
-        if (state.ruleName === '全部规则') {
-          state.ruleIds = [...allRuleIds];
-        } else {
-          const rule = ruleCatalog.find(item => item.name === state.ruleName);
-          if (rule) state.ruleIds = [rule.id];
-        }
-        syncRuleCheckboxes();
-        updateRuleSelectOptions();
+      $('#ruleNameSearch').addEventListener('input', event => {
+        const keyword = event.target.value.trim();
+        $$('#ruleNameDropdown .option').forEach(option => {
+          option.style.display = option.textContent.includes(keyword) ? 'flex' : 'none';
+        });
       });
+
+      bindRuleNameCheckboxEvents();
 
       $('#queryBtn').addEventListener('click', () => {
         state.startDate = $('#startDate').value;
         state.endDate = $('#endDate').value;
-        state.ruleName = $('#ruleSelect').value;
         state.selectedSummary = null;
         $('#detailTip').textContent = '展示当前筛选条件下的销售风险明细';
         render();
@@ -1263,14 +1318,15 @@
         Object.assign(state, {
           stores: [...storeCatalog],
           ruleIds: [...allRuleIds],
-          ruleName: '全部规则',
+          ruleNames: [...allRuleNames],
           startDate: '2026-05-01',
           endDate: '2026-05-14',
           selectedSummary: null
         });
         syncStoreChip();
         syncRuleCheckboxes();
-        updateRuleSelectOptions();
+        renderRuleNameOptions();
+        bindRuleNameCheckboxEvents();
         $('#detailTip').textContent = '展示当前筛选条件下的销售风险明细';
         render();
         showToast('筛选条件已重置');
@@ -1289,7 +1345,7 @@
 
     renderStoreOptions();
     renderRuleIdOptions();
-    updateRuleSelectOptions();
+    renderRuleNameOptions();
     bindEvents();
     syncStoreCheckboxes();
     syncRuleIdChip();
