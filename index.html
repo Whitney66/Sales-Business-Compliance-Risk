@@ -1259,26 +1259,16 @@
         });
       });
 
-      let ruleAllClickTimer = null;
       $$('#ruleIdDropdown input[type="checkbox"]').forEach(input => {
         if (input.value === '全部') {
           input.addEventListener('click', event => {
-            if (event.detail === 1) {
-              ruleAllClickTimer = setTimeout(() => {
-                state.ruleIds = [...allRuleIds];
-                state.ruleNames = [...allRuleNames];
-                syncRuleCheckboxes();
-                renderRuleNameOptions();
-                bindRuleNameCheckboxEvents();
-              }, 220);
-            } else if (event.detail === 2) {
-              clearTimeout(ruleAllClickTimer);
-              state.ruleIds = [];
-              state.ruleNames = [];
-              syncRuleCheckboxes();
-              renderRuleNameOptions();
-              bindRuleNameCheckboxEvents();
-            }
+            event.preventDefault();
+            const shouldSelectAll = state.ruleIds.length !== allRuleIds.length;
+            state.ruleIds = shouldSelectAll ? [...allRuleIds] : [];
+            state.ruleNames = shouldSelectAll ? [...allRuleNames] : [];
+            syncRuleCheckboxes();
+            renderRuleNameOptions();
+            bindRuleNameCheckboxEvents();
           });
           return;
         }
