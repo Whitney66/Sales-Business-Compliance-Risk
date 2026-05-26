@@ -730,7 +730,7 @@
         <div class="field dropdown" id="ruleIdDropdown">
           <label>规则ID</label>
           <div class="select dropdown-trigger" id="ruleIdTrigger">
-            <span class="chip" id="ruleIdChip">全部规则ID</span>
+            <span class="chip" id="ruleIdChip">全部</span>
             <span class="select-placeholder">下拉多选</span>
             <span class="select-arrow">⌄</span>
           </div>
@@ -956,7 +956,7 @@
     }
 
     function selectedRuleSet() {
-      return new Set(state.ruleIds.length ? state.ruleIds : allRuleIds);
+      return new Set(state.ruleIds);
     }
 
     function getSelectedStores() {
@@ -1132,9 +1132,11 @@
     function syncRuleIdChip() {
       const chip = $('#ruleIdChip');
       if (state.ruleIds.length === allRuleIds.length) {
-        chip.textContent = '全部规则ID';
+        chip.textContent = '全部';
       } else if (state.ruleIds.length === 1) {
         chip.textContent = state.ruleIds[0];
+      } else if (state.ruleIds.length === 0) {
+        chip.textContent = '未选择规则ID';
       } else {
         chip.textContent = `已选 ${state.ruleIds.length} 个规则ID`;
       }
@@ -1171,7 +1173,7 @@
 
     function renderRuleIdOptions() {
       $('#ruleIdOptions').innerHTML = [
-        `<label class="option"><input type="checkbox" value="全部规则ID" checked /><span>全部规则ID</span></label>`,
+        `<label class="option"><input type="checkbox" value="全部" checked /><span>全部</span></label>`,
         ...ruleCatalog.map(rule => `
           <label class="option"><input type="checkbox" value="${rule.id}" checked /><span>${rule.id}</span></label>
         `)
@@ -1188,14 +1190,13 @@
         `)
       ].join('');
       state.ruleNames = allRuleNames.filter(name => rules.some(rule => rule.name === name) && state.ruleNames.includes(name));
-      if (state.ruleNames.length === 0) state.ruleNames = rules.map(rule => rule.name);
       syncRuleNameCheckboxes();
     }
 
     function syncRuleCheckboxes() {
       const selected = new Set(state.ruleIds);
       $$('#ruleIdDropdown input[type="checkbox"]').forEach(input => {
-        input.checked = input.value === '全部规则ID' ? state.ruleIds.length === allRuleIds.length : selected.has(input.value);
+        input.checked = input.value === '全部' ? state.ruleIds.length === allRuleIds.length : selected.has(input.value);
       });
       syncRuleIdChip();
     }
@@ -1258,18 +1259,34 @@
         });
       });
 
+      let ruleAllClickTimer = null;
       $$('#ruleIdDropdown input[type="checkbox"]').forEach(input => {
+        if (input.value === '全部') {
+          input.addEventListener('click', event => {
+            if (event.detail === 1) {
+              ruleAllClickTimer = setTimeout(() => {
+                state.ruleIds = [...allRuleIds];
+                state.ruleNames = [...allRuleNames];
+                syncRuleCheckboxes();
+                renderRuleNameOptions();
+                bindRuleNameCheckboxEvents();
+              }, 220);
+            } else if (event.detail === 2) {
+              clearTimeout(ruleAllClickTimer);
+              state.ruleIds = [];
+              state.ruleNames = [];
+              syncRuleCheckboxes();
+              renderRuleNameOptions();
+              bindRuleNameCheckboxEvents();
+            }
+          });
+          return;
+        }
+
         input.addEventListener('change', () => {
-          const allInput = $('#ruleIdDropdown input[value="全部规则ID"]');
-          if (input.value === '全部规则ID' && input.checked) {
-            state.ruleIds = [...allRuleIds];
-          } else {
-            allInput.checked = false;
-            state.ruleIds = $$('#ruleIdDropdown input[type="checkbox"]:checked')
-              .map(item => item.value)
-              .filter(value => value !== '全部规则ID');
-            if (state.ruleIds.length === 0) state.ruleIds = [...allRuleIds];
-          }
+          state.ruleIds = $$('#ruleIdDropdown input[type="checkbox"]:checked')
+            .map(item => item.value)
+            .filter(value => value !== '全部');
           state.ruleNames = ruleCatalog.filter(rule => state.ruleIds.includes(rule.id)).map(rule => rule.name);
           syncRuleCheckboxes();
           renderRuleNameOptions();
