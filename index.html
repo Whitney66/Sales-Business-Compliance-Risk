@@ -568,9 +568,15 @@
 
     .sort-indicator {
       display: inline-block;
-      width: 12px;
+      width: 14px;
       margin-left: 4px;
+      color: #9aa8ba;
+      font-size: 12px;
+    }
+
+    th.sorted .sort-indicator {
       color: var(--primary);
+      font-weight: 800;
     }
 
     tbody tr:nth-child(even) { background: #fbfcff; }
@@ -916,7 +922,7 @@
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
     const allRuleNames = ruleCatalog.map(rule => rule.name);
-    const detailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '营业员', '交易卡号、商户订单号、营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
+    const detailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '交易卡号', '商户订单号', '营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
 
     const summaryData = summaryProfiles.map((item, index) => ({
 
@@ -1008,8 +1014,10 @@
 
     function updateSummarySortIndicators() {
       $$('#summaryTable th.sortable').forEach(th => {
+        const isActive = th.dataset.sort === state.summarySortKey;
+        th.classList.toggle('sorted', isActive);
         const indicator = th.querySelector('.sort-indicator');
-        indicator.textContent = th.dataset.sort === state.summarySortKey ? (state.summarySortDirection === 'asc' ? '↑' : '↓') : '';
+        indicator.textContent = isActive ? (state.summarySortDirection === 'asc' ? '↑' : '↓') : '↕';
       });
     }
 
@@ -1076,8 +1084,9 @@
         '收银员': row.cashier,
         '小票号': row.receipt,
         '授权卡号': `AUTH-${String(row.id).padStart(4, '0')}`,
+        '交易卡号': row.ruleName === '支付人与证件人不一致' ? row.pay : '-',
+        '商户订单号': row.ruleName === '支付人与证件人不一致' ? row.receipt : '-',
         '营业员': row.cashier,
-        '交易卡号、商户订单号、营业员': row.ruleName === '支付人与证件人不一致' ? `${row.pay}｜${row.receipt}｜${row.cashier}` : '-',
         '顾客姓名': `顾客${String.fromCharCode(64 + ((row.id - 1) % 26) + 1)}`,
         '顾客国籍': '中国',
         '性别': row.id % 2 ? '女' : '男',
