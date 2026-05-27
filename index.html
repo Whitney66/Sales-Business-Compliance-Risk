@@ -557,6 +557,22 @@
       user-select: none;
     }
 
+    th.sortable {
+      cursor: pointer;
+    }
+
+    th.sortable:hover {
+      color: var(--primary);
+      background: #e4effd;
+    }
+
+    .sort-indicator {
+      display: inline-block;
+      width: 12px;
+      margin-left: 4px;
+      color: var(--primary);
+    }
+
     tbody tr:nth-child(even) { background: #fbfcff; }
     tbody tr:hover { background: #eaf4ff; }
     tbody tr.selected {
@@ -776,14 +792,14 @@
             <thead>
               <tr>
                 <th style="width: 60px;" class="center">序号</th>
-                <th>门店</th>
-                <th>规则ID</th>
-                <th>规则名称</th>
-                <th>规则内容</th>
-                <th>阈值</th>
+                <th class="sortable" data-sort="store">门店<span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="ruleId">规则ID<span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="ruleName">规则名称<span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="ruleContent">规则内容<span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="threshold">阈值<span class="sort-indicator"></span></th>
                 <th>汇总值</th>
-                <th class="num">命中笔数</th>
-                <th>风险等级</th>
+                <th class="num sortable" data-sort="hits">命中笔数<span class="sort-indicator"></span></th>
+                <th class="sortable" data-sort="level">风险等级<span class="sort-indicator"></span></th>
               </tr>
             </thead>
             <tbody id="summaryBody"></tbody>
@@ -846,25 +862,25 @@
     ];
 
     const ruleCatalog = [
-      { id: 'C01', name: '同一证件高频购买', content: '同一证件号30天内购买相同商品编码次数≥3次，或单日订单数≥5笔', threshold: '次数阈值：3次/30天；单日订单阈值：5笔', level: '中风险' },
-      { id: 'C02', name: '护照、身份信息相同，顾客姓名不同', content: '30天内，同一护照身份信息存在不同顾客姓名，≥2笔', threshold: '次数阈值：≥2次/30天', level: '中低风险' },
-      { id: 'C03', name: '购买时间异常', content: '同一旅客连续离境/入境购物时间存在逻辑错误，两笔订单间隔购买时间≥6小时且≤48小时', threshold: '次数阈值：≥1次/30天', level: '高风险' },
-      { id: 'C04', name: '支付人与证件人不一致', content: '同一支付账号为≥3个不同证件号的订单付款，时间阈值为30天', threshold: '证件数阈值：3个', level: '高风险' },
-      { id: 'C05', name: '大额现金结算', content: '单笔订单现金支付金额≥5000元，或同一收银员日现金结算笔数占比＞30%', threshold: '单笔阈值：5000元；现金占比阈值：30%', level: '中风险' },
-      { id: 'C06', name: '退货频率异常（笔数）', content: '统计数据月份的总退货笔数≥倒退一年内的月平均退货笔数*1.25', threshold: '比例阀值：5%', level: '中风险' },
-      { id: 'C07', name: '退货频率异常（金额）', content: '统计数据月份的总退货金额≥倒退一年内的月平均退货金额*1.05', threshold: '比例阀值：5%', level: '中风险' },
+      { id: 'C01', name: '同一证件高频购买', content: '同一证件号购买相同商品编码次数≥3次，或单日订单数≥5笔', threshold: '3次；5笔', level: '中风险' },
+      { id: 'C02', name: '护照、身份信息相同，顾客姓名不同', content: '同一护照身份信息存在不同顾客姓名，≥2笔', threshold: '≥2次', level: '中低风险' },
+      { id: 'C03', name: '购买时间异常', content: '同一旅客连续离境/入境购物时间存在逻辑错误，两笔订单间隔购买时间≥6小时且≤48小时', threshold: '≥1次', level: '高风险' },
+      { id: 'C04', name: '支付人与证件人不一致', content: '同一支付账号为≥3个不同“证件号+顾客姓名”组合的订单付款', threshold: '3个组合', level: '高风险' },
+      { id: 'C05', name: '大额现金结算', content: '单笔订单现金支付金额≥5000元，或同一收银员日现金结算笔数占比＞30%', threshold: '5000元；30%', level: '中风险' },
+      { id: 'C06', name: '退货频率异常（笔数）', content: '统计数据月份的总退货笔数≥倒退一年内的月平均退货笔数*1.25', threshold: '5%', level: '中风险' },
+      { id: 'C07', name: '退货频率异常（金额）', content: '统计数据月份的总退货金额≥倒退一年内的月平均退货金额*1.05', threshold: '5%', level: '中风险' },
       { id: 'C08', name: '低于成本销售', content: '交易价格＜含税成本', threshold: '交易价格<含税成本', level: '中风险' },
-      { id: 'C09', name: '临时折扣超权限', content: '临时折扣/售价 大于等于 25%', threshold: '折扣率阈值：25%', level: '中风险' },
-      { id: 'C10', name: '提货（寄存）人与购买人不一致', content: '提货人证件号 ≠ 订单购买人证件号', threshold: '不一致即预警', level: '中高风险' },
-      { id: 'C11', name: '集中提货（寄存）', content: '同一提货人1小时内提货订单数≥3笔', threshold: '订单数阈值：3笔/小时', level: '中风险' },
-      { id: 'L01', name: '代购团伙识别', content: '多个购买人证件（≥3）由同一支付账号付款，且这些订单的提货人集中在30分钟内由同一人签字提货', threshold: '证件数≥3，提货时间窗口30分钟', level: '高风险' }
+      { id: 'C09', name: '临时折扣超权限', content: '临时折扣/售价 大于等于 25%', threshold: '25%', level: '中风险' },
+      { id: 'C10', name: '提货（寄存）人与购买人不一致', content: '提货人证件号 ≠ 订单购买人证件号', threshold: '不一致', level: '中高风险' },
+      { id: 'C11', name: '集中提货（寄存）', content: '同一提货人1小时内提货订单数≥3笔', threshold: '3笔/小时', level: '中风险' },
+      { id: 'L01', name: '代购团伙识别', content: '多个购买人证件（≥3）由同一支付账号付款，且这些订单的提货人集中在30分钟内由同一人签字提货', threshold: '证件数≥3；30分钟', level: '高风险' }
     ];
 
     const summaryProfiles = [
-      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01', actual: '同证件30天同商品4次，单日订单6笔', hits: 18, members: 6, items: 8, amount: 28680 },
+      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01', actual: '同证件同商品4次，单日订单6笔', hits: 18, members: 6, items: 8, amount: 28680 },
       { date: '2026-05-14', store: storeCatalog[1], ruleId: 'C02', actual: '同护照信息对应3个顾客姓名', hits: 3, members: 3, items: 4, amount: 7640 },
       { date: '2026-05-14', store: storeCatalog[2], ruleId: 'C03', actual: '两笔订单间隔8小时20分钟', hits: 2, members: 2, items: 3, amount: 5160 },
-      { date: '2026-05-14', store: storeCatalog[3], ruleId: 'C04', actual: '同支付账号关联4个证件号', hits: 4, members: 4, items: 6, amount: 18890 },
+      { date: '2026-05-14', store: storeCatalog[3], ruleId: 'C04', actual: '同支付账号关联4个证件号+顾客姓名组合', hits: 4, members: 4, items: 6, amount: 18890 },
       { date: '2026-05-14', store: storeCatalog[4], ruleId: 'C05', actual: '单笔现金支付6,800元', hits: 5, members: 5, items: 7, amount: 39200 },
       { date: '2026-05-14', store: storeCatalog[5], ruleId: 'C06', actual: '当月退货笔数为均值的1.32倍', hits: 11, members: 9, items: 12, amount: 12680 },
       { date: '2026-05-14', store: storeCatalog[6], ruleId: 'C07', actual: '当月退货金额为均值的1.12倍', hits: 7, members: 6, items: 8, amount: 45890 },
@@ -873,17 +889,17 @@
       { date: '2026-05-14', store: storeCatalog[9], ruleId: 'C10', actual: '提货人与购买人证件号不一致', hits: 4, members: 4, items: 5, amount: 11860 },
       { date: '2026-05-14', store: storeCatalog[10], ruleId: 'C11', actual: '同一提货人1小时内提货4笔', hits: 4, members: 4, items: 9, amount: 15670 },
       { date: '2026-05-14', store: storeCatalog[11], ruleId: 'L01', actual: '同支付账号关联4个证件，30分钟内同人提货', hits: 5, members: 5, items: 11, amount: 56200 },
-      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01', actual: '同证件30天同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
+      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01', actual: '同证件同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
       { date: '2026-05-13', store: storeCatalog[13], ruleId: 'C05', actual: '收银员日现金结算笔数占比34%', hits: 6, members: 6, items: 6, amount: 31200 },
       { date: '2026-05-13', store: storeCatalog[14], ruleId: 'L01', actual: '3个证件由同支付账号付款并集中提货', hits: 3, members: 3, items: 8, amount: 34880 }
     ];
 
     const detailProfiles = [
-      { date: '2026-05-14', time: '10:12:35', store: storeCatalog[0], ruleId: 'C01', receipt: 'XS202605140818001', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '同证件30天同商品4次', deviation: '+1次', desc: '同一证件高频购买相同商品' },
+      { date: '2026-05-14', time: '10:12:35', store: storeCatalog[0], ruleId: 'C01', receipt: 'XS202605140818001', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '同证件同商品4次', deviation: '+1次', desc: '同一证件高频购买相同商品' },
       { date: '2026-05-14', time: '11:24:08', store: storeCatalog[0], ruleId: 'C01', receipt: 'XS202605140818002', pos: 'POS-03', cashier: '李某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '支付宝', saleAmount: 1680, paidAmount: 1680, actual: '单日订单6笔', deviation: '+1笔', desc: '同一证件单日订单数超过阈值' },
       { date: '2026-05-14', time: '09:40:19', store: storeCatalog[1], ruleId: 'C02', receipt: 'XS202605140819001', pos: 'POS-02', cashier: '赵某', cert: 'P1234****88', sku: 'SKU-C02-001', product: '精品商品B', pay: '微信', saleAmount: 2380, paidAmount: 2380, actual: '同护照信息对应3个顾客姓名', deviation: '+1次', desc: '护照、身份信息相同但顾客姓名不同' },
       { date: '2026-05-14', time: '15:18:42', store: storeCatalog[2], ruleId: 'C03', receipt: 'XS202605146118001', pos: 'POS-06', cashier: '孙某', cert: 'ID6101********3390', sku: 'SKU-C03-001', product: '食品礼盒C', pay: '银行卡', saleAmount: 980, paidAmount: 980, actual: '两笔订单间隔8小时20分钟', deviation: '命中', desc: '航班购物时间存在逻辑异常' },
-      { date: '2026-05-14', time: '16:02:27', store: storeCatalog[3], ruleId: 'C04', receipt: 'XS202605146610001', pos: 'POS-04', cashier: '周某', cert: 'ID2102********5512', sku: 'SKU-C04-001', product: '酒水商品D', pay: '同一支付账号', saleAmount: 4890, paidAmount: 4890, actual: '同支付账号关联4个证件号', deviation: '+1个', desc: '支付人与证件人存在不一致风险' },
+      { date: '2026-05-14', time: '16:02:27', store: storeCatalog[3], ruleId: 'C04', receipt: 'XS202605146610001', pos: 'POS-04', cashier: '周某', cert: 'ID2102********5512', sku: 'SKU-C04-001', product: '酒水商品D', pay: '同一支付账号', saleAmount: 4890, paidAmount: 4890, actual: '同支付账号关联4个证件号+顾客姓名组合', deviation: '+1个组合', desc: '支付人与证件人存在不一致风险' },
       { date: '2026-05-14', time: '13:46:50', store: storeCatalog[4], ruleId: 'C05', receipt: 'XS202605146702001', pos: 'POS-01', cashier: '吴某', cert: 'ID2311********9088', sku: 'SKU-C05-001', product: '腕表商品E', pay: '现金', saleAmount: 6800, paidAmount: 6800, actual: '单笔现金支付6,800元', deviation: '+1,800元', desc: '大额现金结算超过单笔阈值' },
       { date: '2026-05-14', time: '18:12:21', store: storeCatalog[5], ruleId: 'C06', receipt: 'TH202605146743001', pos: 'POS-05', cashier: '郑某', cert: 'ID1507********6610', sku: 'SKU-C06-001', product: '退货商品F', pay: '原路退回', saleAmount: -860, paidAmount: -860, actual: '当月退货笔数为均值的1.32倍', deviation: '+0.07倍', desc: '退货笔数频率高于历史均值阈值' },
       { date: '2026-05-14', time: '18:28:56', store: storeCatalog[6], ruleId: 'C07', receipt: 'TH202605146764001', pos: 'POS-02', cashier: '钱某', cert: 'ID4301********7791', sku: 'SKU-C07-001', product: '退货商品G', pay: '原路退回', saleAmount: -12600, paidAmount: -12600, actual: '当月退货金额为均值的1.12倍', deviation: '+0.07倍', desc: '退货金额频率高于历史均值阈值' },
@@ -892,7 +908,7 @@
       { date: '2026-05-14', time: '17:10:03', store: storeCatalog[9], ruleId: 'C10', receipt: 'XS202605146826001', pos: 'POS-03', cashier: '刘某', cert: 'ID4401********7312', sku: 'SKU-C10-001', product: '寄存商品J', pay: '支付宝', saleAmount: 2680, paidAmount: 2680, actual: '提货人与购买人证件号不一致', deviation: '不一致', desc: '提货（寄存）人与购买人不一致' },
       { date: '2026-05-14', time: '19:05:36', store: storeCatalog[10], ruleId: 'C11', receipt: 'TH202605146842001', pos: 'PICK-01', cashier: '何某', cert: 'ID3301********4456', sku: 'SKU-C11-001', product: '集中提货商品K', pay: '已支付', saleAmount: 4980, paidAmount: 4980, actual: '同一提货人1小时内提货4笔', deviation: '+1笔', desc: '同一提货人短时间集中提货' },
       { date: '2026-05-14', time: '20:22:14', store: storeCatalog[11], ruleId: 'L01', receipt: 'XS202605146850001', pos: 'POS-06', cashier: '宋某', cert: 'ID3702********8099', sku: 'SKU-L01-001', product: '团伙识别商品L', pay: '同一支付账号', saleAmount: 11200, paidAmount: 11200, actual: '4个证件同支付账号付款，30分钟内同人提货', deviation: '+1个证件', desc: '疑似代购团伙集中购买与提货' },
-      { date: '2026-05-13', time: '10:58:11', store: storeCatalog[12], ruleId: 'C01', receipt: 'XS202605136851001', pos: 'POS-02', cashier: '高某', cert: 'ID2101********6621', sku: 'SKU-C01-002', product: '香化套装M', pay: '银行卡', saleAmount: 1280, paidAmount: 1280, actual: '同证件30天同商品3次', deviation: '达阈值', desc: '同一证件高频购买达到阈值' },
+      { date: '2026-05-13', time: '10:58:11', store: storeCatalog[12], ruleId: 'C01', receipt: 'XS202605136851001', pos: 'POS-02', cashier: '高某', cert: 'ID2101********6621', sku: 'SKU-C01-002', product: '香化套装M', pay: '银行卡', saleAmount: 1280, paidAmount: 1280, actual: '同证件同商品3次', deviation: '达阈值', desc: '同一证件高频购买达到阈值' },
       { date: '2026-05-13', time: '12:01:46', store: storeCatalog[13], ruleId: 'C05', receipt: 'XS202605136852001', pos: 'POS-01', cashier: '曹某', cert: 'ID5301********4418', sku: 'SKU-C05-002', product: '精品商品N', pay: '现金', saleAmount: 5200, paidAmount: 5200, actual: '单笔现金支付5,200元', deviation: '+200元', desc: '大额现金结算超过单笔阈值' },
       { date: '2026-05-13', time: '16:33:29', store: storeCatalog[14], ruleId: 'L01', receipt: 'XS202605136853001', pos: 'POS-08', cashier: '许某', cert: 'ID3101********7731', sku: 'SKU-L01-002', product: '团伙识别商品O', pay: '同一支付账号', saleAmount: 9860, paidAmount: 9860, actual: '3个证件同支付账号付款并集中提货', deviation: '达阈值', desc: '疑似代购团伙识别命中' }
     ];
@@ -900,9 +916,7 @@
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
     const allRuleNames = ruleCatalog.map(rule => rule.name);
-    const standardDetailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
-    const payerDetailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '交易卡号、商户订单号、营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
-    const payerDetailRuleNames = new Set(['支付人与证件人不一致']);
+    const detailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '营业员', '交易卡号、商户订单号、营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
 
     const summaryData = summaryProfiles.map((item, index) => ({
 
@@ -929,7 +943,9 @@
       ruleNames: [...allRuleNames],
       startDate: '2026-05-01',
       endDate: '2026-05-14',
-      selectedSummary: null
+      selectedSummary: null,
+      summarySortKey: '',
+      summarySortDirection: 'asc'
     };
 
     const $ = selector => document.querySelector(selector);
@@ -978,8 +994,27 @@
       });
     }
 
+    function sortSummaryRows(rows) {
+      if (!state.summarySortKey) return rows;
+      return [...rows].sort((left, right) => {
+        const leftValue = left[state.summarySortKey];
+        const rightValue = right[state.summarySortKey];
+        const result = state.summarySortKey === 'hits'
+          ? Number(leftValue) - Number(rightValue)
+          : String(leftValue).localeCompare(String(rightValue), 'zh-CN');
+        return state.summarySortDirection === 'asc' ? result : -result;
+      });
+    }
+
+    function updateSummarySortIndicators() {
+      $$('#summaryTable th.sortable').forEach(th => {
+        const indicator = th.querySelector('.sort-indicator');
+        indicator.textContent = th.dataset.sort === state.summarySortKey ? (state.summarySortDirection === 'asc' ? '↑' : '↓') : '';
+      });
+    }
+
     function getSummaryRows() {
-      return applyFilters(summaryData);
+      return sortSummaryRows(applyFilters(summaryData));
     }
 
     function getDetailRows() {
@@ -1015,6 +1050,7 @@
       $('#summaryEmpty').classList.toggle('show', rows.length === 0);
       $('#summaryTable').style.display = rows.length ? 'table' : 'none';
       $('#summaryFooter').textContent = `共 ${rows.length} 条汇总记录`;
+      updateSummarySortIndicators();
 
       $$('#summaryBody tr').forEach(tr => {
         tr.addEventListener('click', () => {
@@ -1025,11 +1061,6 @@
           render();
         });
       });
-    }
-
-    function detailFieldsForRows(rows) {
-      const activeRuleName = rows.length && rows.every(row => row.ruleName === rows[0].ruleName) ? rows[0].ruleName : '';
-      return payerDetailRuleNames.has(activeRuleName) ? payerDetailFields : standardDetailFields;
     }
 
     function detailValue(row, field, index) {
@@ -1046,7 +1077,7 @@
         '小票号': row.receipt,
         '授权卡号': `AUTH-${String(row.id).padStart(4, '0')}`,
         '营业员': row.cashier,
-        '交易卡号、商户订单号、营业员': `${row.pay}｜${row.receipt}｜${row.cashier}`,
+        '交易卡号、商户订单号、营业员': row.ruleName === '支付人与证件人不一致' ? `${row.pay}｜${row.receipt}｜${row.cashier}` : '-',
         '顾客姓名': `顾客${String.fromCharCode(64 + ((row.id - 1) % 26) + 1)}`,
         '顾客国籍': '中国',
         '性别': row.id % 2 ? '女' : '男',
@@ -1088,7 +1119,7 @@
 
     function renderDetail() {
       const rows = getDetailRows();
-      const fields = detailFieldsForRows(rows);
+      const fields = detailFields;
       $('#detailHead').innerHTML = `<tr>${fields.map((field, index) => `<th${index === 0 ? ' style="width: 60px;" class="center"' : ''}>${escapeHtml(field)}</th>`).join('')}</tr>`;
       $('#detailTable').style.minWidth = `${Math.max(1450, fields.length * 118)}px`;
       const body = $('#detailBody');
@@ -1245,6 +1276,19 @@
       bindDropdown('#ruleNameDropdown', '#ruleNameTrigger');
       document.addEventListener('click', () => $$('.dropdown').forEach(item => item.classList.remove('open')));
 
+      $$('#summaryTable th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+          const key = th.dataset.sort;
+          if (state.summarySortKey === key) {
+            state.summarySortDirection = state.summarySortDirection === 'asc' ? 'desc' : 'asc';
+          } else {
+            state.summarySortKey = key;
+            state.summarySortDirection = 'asc';
+          }
+          renderSummary();
+        });
+      });
+
       $$('#storeDropdown input[type="checkbox"]').forEach(input => {
         input.addEventListener('change', () => {
           if (input.value === '全部门店') {
@@ -1325,7 +1369,9 @@
           ruleNames: [...allRuleNames],
           startDate: '2026-05-01',
           endDate: '2026-05-14',
-          selectedSummary: null
+          selectedSummary: null,
+          summarySortKey: '',
+          summarySortDirection: 'asc'
         });
         syncStoreChip();
         syncRuleCheckboxes();
