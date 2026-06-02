@@ -922,7 +922,7 @@
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
     const allRuleNames = ruleCatalog.map(rule => rule.name);
-    const detailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '交易卡号', '商户订单号', '营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '航班号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
+    const detailFields = ['序号', '柜组', '收银机号', '收银员', '小票号', '授权卡号', '卡别', '交易卡号', '商户订单号', '营业员', '顾客姓名', '顾客国籍', '性别', '年龄', '证件类型', '护照号', '提货顾客姓名', '提货护照号', '航班号', '收货寄存点', '寄存单号', '商品条码', '商品编码', '商品名称', '供应商', '厂商货号', '品牌', '大类', '中类', '商品类别', '数量', '含量', '售价', '售价金额', '交易价格', '成交金额', '交易货币类型', '含税成本', '不含税成本', '会员折扣', '促销折扣', '促销折扣分担', '促销单号', '临时折扣', '批发分担', '折扣分担', '满减折扣', '满减折扣分担', '满减折扣单号', '组包折扣'];
 
     const summaryData = summaryProfiles.map((item, index) => ({
 
@@ -1077,6 +1077,11 @@
       const paidAmount = Math.abs(Number(row.paidAmount));
       const taxCost = Math.round(saleAmount * 0.72);
       const noTaxCost = Math.round(taxCost / 1.13);
+      const customerName = `顾客${String.fromCharCode(64 + ((row.id - 1) % 26) + 1)}`;
+      const isPassport = row.cert.startsWith('P');
+      const isPickupRelated = ['C10', 'C11', 'L01'].includes(row.ruleId);
+      const pickupName = row.ruleId === 'C10' ? `提货人${String.fromCharCode(75 + ((row.id - 1) % 10))}` : customerName;
+      const pickupPassport = row.ruleId === 'C10' ? `PICK${String(row.id).padStart(6, '0')}` : row.cert;
       const values = {
         '序号': index + 1,
         '柜组': `${storeCode}柜组`,
@@ -1084,16 +1089,21 @@
         '收银员': row.cashier,
         '小票号': row.receipt,
         '授权卡号': `AUTH-${String(row.id).padStart(4, '0')}`,
+        '卡别': row.pay === '银行卡' ? '银联卡' : row.pay === '支付宝' ? '支付宝账户' : row.pay === '微信' ? '微信账户' : row.pay,
         '交易卡号': row.ruleName === '支付人与证件人不一致' ? row.pay : '-',
         '商户订单号': row.ruleName === '支付人与证件人不一致' ? row.receipt : '-',
         '营业员': row.cashier,
-        '顾客姓名': `顾客${String.fromCharCode(64 + ((row.id - 1) % 26) + 1)}`,
+        '顾客姓名': customerName,
         '顾客国籍': '中国',
         '性别': row.id % 2 ? '女' : '男',
         '年龄': 26 + (row.id % 18),
-        '证件类型': row.cert.startsWith('P') ? '护照' : '身份证',
+        '证件类型': isPassport ? '护照' : '身份证',
         '护照号': row.cert,
+        '提货顾客姓名': isPickupRelated ? pickupName : '-',
+        '提货护照号': isPickupRelated ? pickupPassport : '-',
         '航班号': `CZ${6200 + row.id}`,
+        '收货寄存点': isPickupRelated ? `${storeCode}号寄存点` : '-',
+        '寄存单号': isPickupRelated ? `JC${row.date.replace(/-/g, '')}${String(row.id).padStart(4, '0')}` : '-',
         '商品条码': `69${String(100000000000 + row.id * 137).slice(-11)}`,
         '商品编码': row.sku,
         '商品名称': row.product,
@@ -1109,6 +1119,7 @@
         '售价金额': formatMoney(saleAmount),
         '交易价格': formatMoney(paidAmount),
         '成交金额': formatMoney(paidAmount),
+        '交易货币类型': 'CNY',
         '含税成本': formatMoney(taxCost),
         '不含税成本': formatMoney(noTaxCost),
         '会员折扣': '0.00',
