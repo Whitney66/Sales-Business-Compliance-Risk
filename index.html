@@ -977,23 +977,26 @@
     ];
 
     const summaryProfiles = [
-      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01', actual: '30天内同证件同商品4次，单日订单6笔', hits: 18, members: 6, items: 8, amount: 28680 },
+      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01-1', actual: '30天内同证件同商品4次', hits: 18, members: 6, items: 8, amount: 28680 },
+      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01-2', actual: '单日订单6笔', hits: 12, members: 6, items: 6, amount: 16840 },
       { date: '2026-05-14', store: storeCatalog[1], ruleId: 'C02', actual: '同护照信息对应3个顾客姓名', hits: 3, members: 3, items: 4, amount: 7640 },
       { date: '2026-05-14', store: storeCatalog[2], ruleId: 'C03', actual: '两笔订单间隔8小时20分钟', hits: 2, members: 2, items: 3, amount: 5160 },
       { date: '2026-05-14', store: storeCatalog[3], ruleId: 'C04', actual: '同支付账号关联4个证件号+顾客姓名组合', hits: 4, members: 4, items: 6, amount: 18890 },
-      { date: '2026-05-14', store: storeCatalog[4], ruleId: 'C05', actual: '单笔现金支付6,800元', hits: 5, members: 5, items: 7, amount: 39200 },
+      { date: '2026-05-14', store: storeCatalog[4], ruleId: 'C05-1', actual: '单笔现金支付6,800元', hits: 5, members: 5, items: 7, amount: 39200 },
       { date: '2026-05-14', store: storeCatalog[5], ruleId: 'C06', actual: '当月退货笔数为均值的1.32倍', hits: 11, members: 9, items: 12, amount: 12680 },
       { date: '2026-05-14', store: storeCatalog[6], ruleId: 'C07', actual: '当月退货金额为均值的1.12倍', hits: 7, members: 6, items: 8, amount: 45890 },
       { date: '2026-05-14', store: storeCatalog[7], ruleId: 'C08', actual: '交易价格较含税成本低120元', hits: 6, members: 6, items: 6, amount: 9820 },
       { date: '2026-05-14', store: storeCatalog[8], ruleId: 'C09', actual: '临时折扣率32%', hits: 8, members: 8, items: 10, amount: 17640 },
-      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01', actual: '30天内同证件同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
-      { date: '2026-05-13', store: storeCatalog[13], ruleId: 'C05', actual: '收银员日现金结算笔数占比34%', hits: 6, members: 6, items: 6, amount: 31200 }
+      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01-1', actual: '30天内同证件同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
+      { date: '2026-05-13', store: storeCatalog[13], ruleId: 'C05-2', actual: '收银员日现金结算笔数占比34%', hits: 6, members: 6, items: 6, amount: 31200 }
     ];
 
     const detailProfileTemplates = {
-      C01: [
-        { time: '10:12:35', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '30天内同证件同商品4次', deviation: '+1次', desc: '同一证件30天内高频购买相同商品' },
-        { time: '11:24:08', pos: 'POS-03', cashier: '李某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '支付宝', saleAmount: 1680, paidAmount: 1680, actual: '单日订单6笔', deviation: '+1笔', desc: '同一证件单日订单数超过阈值' }
+      'C01-1': [
+        { time: '10:12:35', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '30天内同证件同商品4次', deviation: '+1次', desc: '同一证件30天内高频购买相同商品' }
+      ],
+      'C01-2': [
+        { time: '11:24:08', pos: 'POS-03', cashier: '李某', cert: 'ID4601********1234', sku: 'SKU-C01-002', product: '香化套装A', pay: '支付宝', saleAmount: 1680, paidAmount: 1680, actual: '单日订单6笔', deviation: '+2笔', desc: '同一证件单日订单数超过阈值' }
       ],
       C02: [
         { time: '09:40:19', pos: 'POS-02', cashier: '赵某', cert: 'P1234****88', sku: 'SKU-C02-001', product: '精品商品B', pay: '微信', saleAmount: 2380, paidAmount: 2380, actual: '同护照信息对应3个顾客姓名', deviation: '+1次', desc: '护照、身份信息相同但顾客姓名不同' }
@@ -1004,9 +1007,12 @@
       C04: [
         { time: '16:02:27', pos: 'POS-04', cashier: '周某', cert: 'ID2102********5512', sku: 'SKU-C04-001', product: '酒水商品D', pay: '同一支付账号', saleAmount: 4890, paidAmount: 4890, actual: '同支付账号关联4个证件号+顾客姓名组合', deviation: '+1个组合', desc: '支付人与证件人存在不一致风险' }
       ],
-      C05: [
+      'C05-1': [
         { time: '13:46:50', pos: 'POS-01', cashier: '吴某', cert: 'ID2311********9088', sku: 'SKU-C05-001', product: '腕表商品E', pay: '现金', saleAmount: 6800, paidAmount: 6800, actual: '单笔现金支付6,800元', deviation: '+1,800元', desc: '大额现金结算超过单笔标准' },
         { time: '12:01:46', pos: 'POS-01', cashier: '曹某', cert: 'ID5301********4418', sku: 'SKU-C05-002', product: '精品商品N', pay: '现金', saleAmount: 5200, paidAmount: 5200, actual: '单笔现金支付5,200元', deviation: '+200元', desc: '大额现金结算超过单笔标准' }
+      ],
+      'C05-2': [
+        { time: '17:18:26', pos: 'POS-08', cashier: '曹某', cert: 'ID5301********4418', sku: 'SKU-C05-003', product: '精品商品N', pay: '现金', saleAmount: 1880, paidAmount: 1880, actual: '收银员日现金结算笔数占比34%', deviation: '+4%', desc: '现金结算笔数占比超过阈值' }
       ],
       C06: [
         { time: '18:12:21', pos: 'POS-05', cashier: '郑某', cert: 'ID1507********6610', sku: 'SKU-C06-001', product: '退货商品F', pay: '原路退回', saleAmount: -860, paidAmount: -860, actual: '当月退货笔数为均值的1.32倍', deviation: '+0.07倍', desc: '退货笔数频率高于历史均值阈值' }
@@ -1022,7 +1028,7 @@
       ]
     };
 
-    const monthFilterRuleIds = ['C01', 'C06', 'C07'];
+    const monthFilterRuleIds = ['C01-1', 'C06', 'C07'];
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
     const allRuleLabels = ruleCatalog.map(rule => `${rule.id} ${rule.name}`);
