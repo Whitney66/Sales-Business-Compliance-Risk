@@ -977,7 +977,7 @@
     ];
 
     const summaryProfiles = [
-      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01-1', actual: '30天内同证件同商品4次', hits: 18, members: 6, items: 8, amount: 28680 },
+      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01-1', actual: '所选日期的月份内同证件号同商品4次', hits: 18, members: 6, items: 8, amount: 28680 },
       { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01-2', actual: '单日订单6笔', hits: 12, members: 6, items: 6, amount: 16840 },
       { date: '2026-05-14', store: storeCatalog[1], ruleId: 'C02', actual: '同护照信息对应3个顾客姓名', hits: 3, members: 3, items: 4, amount: 7640 },
       { date: '2026-05-14', store: storeCatalog[2], ruleId: 'C03', actual: '两笔订单间隔8小时20分钟', hits: 2, members: 2, items: 3, amount: 5160 },
@@ -987,13 +987,13 @@
       { date: '2026-05-14', store: storeCatalog[6], ruleId: 'C07', actual: '当月退货金额为均值的1.12倍', hits: 7, members: 6, items: 8, amount: 45890 },
       { date: '2026-05-14', store: storeCatalog[7], ruleId: 'C08', actual: '交易价格较含税成本低120元', hits: 6, members: 6, items: 6, amount: 9820 },
       { date: '2026-05-14', store: storeCatalog[8], ruleId: 'C09', actual: '临时折扣率32%', hits: 8, members: 8, items: 10, amount: 17640 },
-      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01-1', actual: '30天内同证件同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
+      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01-1', actual: '所选日期的月份内同证件号同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
       { date: '2026-05-13', store: storeCatalog[13], ruleId: 'C05-2', actual: '收银员日现金结算笔数占比34%', hits: 6, members: 6, items: 6, amount: 31200 }
     ];
 
     const detailProfileTemplates = {
       'C01-1': [
-        { time: '10:12:35', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '30天内同证件同商品4次', deviation: '+1次', desc: '同一证件30天内高频购买相同商品' }
+        { time: '10:12:35', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '所选日期的月份内同证件号同商品4次', deviation: '+1次', desc: '按销售日期的完成月汇总，同一证件号同商品购买次数超过阈值' }
       ],
       'C01-2': [
         { time: '11:24:08', pos: 'POS-03', cashier: '李某', cert: 'ID4601********1234', sku: 'SKU-C01-002', product: '香化套装A', pay: '支付宝', saleAmount: 1680, paidAmount: 1680, actual: '单日订单6笔', deviation: '+2笔', desc: '同一证件单日订单数超过阈值' }
