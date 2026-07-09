@@ -19,10 +19,10 @@
       --danger: #d93025;
       --warning: #bd6b00;
       --success: #1f7a3a;
-      --risk-red: #ff0b0b;
-      --risk-orange: #ffc000;
-      --risk-yellow: #ffff00;
-      --risk-cyan: #12b5dc;
+      --risk-red: #d71920;
+      --risk-orange: #f28c28;
+      --risk-yellow: #ffd84d;
+      --risk-cyan: #00a6d6;
       --shadow: 0 8px 24px rgba(31, 45, 61, 0.08);
     }
 
@@ -624,10 +624,10 @@
     .tag.high { color: var(--danger); background: #fdeceb; }
     .tag.mid { color: var(--warning); background: #fff3dc; }
     .tag.low { color: var(--success); background: #e8f6ed; }
-    .tag.warn-very-high { color: #b42318; background: #fdeceb; }
-    .tag.warn-high { color: #9a5b00; background: #fff3dc; }
-    .tag.warn-medium { color: #7a6b00; background: #fffbd1; }
-    .tag.warn-low { color: #08798a; background: #e6faff; }
+    .tag.warn-very-high { color: #fff; background: var(--risk-red); }
+    .tag.warn-high { color: #fff; background: var(--risk-orange); }
+    .tag.warn-medium { color: #5f4a00; background: var(--risk-yellow); }
+    .tag.warn-low { color: #fff; background: var(--risk-cyan); }
 
     .chart-panel { margin-bottom: 14px; }
 
@@ -1268,7 +1268,7 @@
     }
 
     function getStatisticInterval() {
-      return `${state.startDate} 至 ${state.endDate}`;
+      return `${state.startDate.slice(0, 7)} 至 ${state.endDate.slice(0, 7)}`;
     }
 
     function getStatisticMonths(rows) {
@@ -1475,7 +1475,7 @@
       }
 
       $('#chartTip').textContent = '按筛选条件统计门店风险值汇总';
-      const colorMap = { '非常高': '#ff0b0b', '高': '#ffc000', '中等': '#ffff00', '低': '#12b5dc' };
+      const colorMap = { '非常高': '#d71920', '高': '#f28c28', '中等': '#ffd84d', '低': '#00a6d6' };
       const width = 1000;
       const height = 300;
       const margin = { top: 24, right: 24, bottom: 78, left: 54 };
