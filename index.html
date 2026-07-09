@@ -19,6 +19,10 @@
       --danger: #d93025;
       --warning: #bd6b00;
       --success: #1f7a3a;
+      --risk-red: #ff0b0b;
+      --risk-orange: #ffc000;
+      --risk-yellow: #ffff00;
+      --risk-cyan: #12b5dc;
       --shadow: 0 8px 24px rgba(31, 45, 61, 0.08);
     }
 
@@ -240,7 +244,7 @@
 
     .filter-grid {
       display: grid;
-      grid-template-columns: 1.1fr 0.95fr 0.95fr 1.65fr auto;
+      grid-template-columns: 1.1fr 0.85fr 0.95fr 0.95fr 1.45fr auto;
       gap: 14px 18px;
       align-items: end;
     }
@@ -620,6 +624,64 @@
     .tag.high { color: var(--danger); background: #fdeceb; }
     .tag.mid { color: var(--warning); background: #fff3dc; }
     .tag.low { color: var(--success); background: #e8f6ed; }
+    .tag.warn-very-high { color: #b42318; background: #fdeceb; }
+    .tag.warn-high { color: #9a5b00; background: #fff3dc; }
+    .tag.warn-medium { color: #7a6b00; background: #fffbd1; }
+    .tag.warn-low { color: #08798a; background: #e6faff; }
+
+    .chart-panel { margin-bottom: 14px; }
+
+    .risk-chart {
+      height: 320px;
+      padding: 14px 18px 8px;
+      position: relative;
+      background: #fff;
+    }
+
+    .risk-chart svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .risk-chart-empty {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #7a8ba0;
+      background: #fff;
+      z-index: 1;
+    }
+
+    .risk-chart-empty.show { display: flex; }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px 18px;
+      align-items: center;
+      padding: 0 18px 14px;
+      color: #5f6f85;
+      font-size: 13px;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      margin-right: 6px;
+      vertical-align: -1px;
+    }
+
+    .legend-dot.warn-very-high { background: var(--risk-red); }
+    .legend-dot.warn-high { background: var(--risk-orange); }
+    .legend-dot.warn-medium { background: var(--risk-yellow); }
+    .legend-dot.warn-low { background: var(--risk-cyan); }
+
+    .dashboard-table { min-width: 860px; }
 
     .link {
       color: #237be8;
@@ -815,6 +877,19 @@
           </div>
         </div>
 
+        <div class="field dropdown" id="channelDropdown">
+          <label>渠道</label>
+          <div class="select dropdown-trigger" id="channelTrigger">
+            <span class="chip" id="channelChip">全部渠道</span>
+            <span class="select-placeholder">下拉多选</span>
+            <span class="select-arrow">⌄</span>
+          </div>
+          <div class="dropdown-menu" id="channelMenu">
+            <input class="option-search" id="channelSearch" placeholder="搜索渠道" />
+            <div id="channelOptions"></div>
+          </div>
+        </div>
+
         <div class="field dropdown" id="storeDropdown">
           <label>门店</label>
           <div class="select dropdown-trigger" id="storeTrigger">
@@ -841,6 +916,15 @@
           </div>
         </div>
 
+        <div class="field hidden" id="salesMonthField">
+          <label>销售月份</label>
+          <div class="date-range">
+            <input class="date-input" id="salesMonthStart" type="month" value="2026-05" />
+            <span>至</span>
+            <input class="date-input" id="salesMonthEnd" type="month" value="2026-05" />
+          </div>
+        </div>
+
         <div class="btn-group">
           <button class="btn primary" id="queryBtn">查询</button>
           <button class="btn" id="resetBtn">重置</button>
@@ -851,14 +935,57 @@
       </div>
     </section>
 
+    <section class="panel chart-panel">
+      <div class="panel-header">
+        <div class="panel-title">门店风险值汇总柱形图</div>
+        <div class="panel-tip" id="chartTip">按销售日期月份统计，横轴为门店，纵轴为风险值汇总</div>
+      </div>
+      <div class="risk-chart" id="riskChart">
+        <div class="risk-chart-empty" id="riskChartEmpty">暂无图表数据</div>
+        <svg id="riskBarChart" role="img" aria-label="门店风险值汇总柱形图"></svg>
+      </div>
+      <div class="chart-legend">
+        <span><i class="legend-dot warn-very-high"></i>非常高</span>
+        <span><i class="legend-dot warn-high"></i>高</span>
+        <span><i class="legend-dot warn-medium"></i>中等</span>
+        <span><i class="legend-dot warn-low"></i>低</span>
+      </div>
+    </section>
+
     <section class="panel report-panel">
       <div class="inner-tabs">
-        <div class="inner-tab active" data-tab="summaryPanel">汇总 <span class="badge" id="summaryBadge">0</span></div>
+        <div class="inner-tab active" data-tab="dashboardPanel">看板 <span class="badge" id="dashboardBadge">0</span></div>
+        <div class="inner-tab" data-tab="summaryPanel">汇总 <span class="badge" id="summaryBadge">0</span></div>
         <div class="inner-tab" data-tab="detailPanel">明细 <span class="badge" id="detailBadge">0</span></div>
         <div class="inner-tab-actions"><button class="btn" id="tabExportBtn">导出</button></div>
       </div>
 
-      <div class="tab-panel active" id="summaryPanel">
+      <div class="tab-panel active" id="dashboardPanel">
+        <div class="panel-header">
+          <div class="panel-tip">按销售日期范围与门店汇总风险值，联动上方筛选条件</div>
+        </div>
+        <div class="table-wrap">
+          <table id="dashboardTable" class="dashboard-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;" class="center">序号</th>
+                <th>统计区间</th>
+                <th>门店</th>
+                <th class="num">风险值汇总</th>
+                <th>预警等级</th>
+              </tr>
+            </thead>
+            <tbody id="dashboardBody"></tbody>
+          </table>
+          <div class="empty" id="dashboardEmpty"><strong>暂无看板数据</strong><span>请调整筛选条件后重新查询</span></div>
+        </div>
+        <div class="footer-row">
+          <div id="dashboardFooter">共 0 条看板记录</div>
+          <div class="pager"><span class="page-btn">‹</span><span class="page-btn active">1</span><span class="page-btn">›</span></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="summaryPanel">
         <div class="panel-header">
           <div class="panel-tip">按“门店 + 规则ID + 规则名称 + 阈值”汇总，点击行可切换到对应明细</div>
         </div>
@@ -867,7 +994,6 @@
             <thead>
               <tr>
                 <th style="width: 60px;" class="center">序号</th>
-                <th class="sortable" data-sort="date">销售日期<span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="store">门店<span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="ruleId">规则ID<span class="sort-indicator"></span></th>
                 <th class="sortable" data-sort="ruleName">规则名称<span class="sort-indicator"></span></th>
@@ -919,6 +1045,11 @@
         <p>报表名称：销售业务指标模型（规模以下）</p>
         <p>门店：编码+名称，门店范围仅为总部EOP门店</p>
         <p>规则：【ID+名称】，数据取自业务在风险规则阈值配置填报表中进行维护值</p>
+        <p>渠道：门店所属渠道，用于与门店、规则、销售日期联动筛选。</p>
+        <p class="modal-section-title">（0）看板：基于门店粒度统计风险值汇总与预警等级</p>
+        <p>单项风险值：命中笔数 × 风险得分系数；风险值汇总为门店下所有规则单项风险值汇总后归一到0—5，存在小数保留两位小数。</p>
+        <p>预警等级：门店风险汇总值得分从高到低排序，各取25%分段，展示非常高、高、中等、低。</p>
+        <p>柱形图：统计销售日期截取的月维度数据，横轴为门店，纵轴为风险值汇总，颜色与预警等级联动。</p>
         <p class="modal-section-title">（1）汇总：基于门店粒度统计每个规则对应的异常情况</p>
         <p>阈值：对应配置表的参数项</p>
         <p>汇总值：对应所选时间范围下，每个门店在触发参数项的累计值</p>
@@ -927,9 +1058,8 @@
         <p class="modal-section-title">（2）明细：基于门店粒度下钻至该门店的异常明细信息</p>
         <p>明细包含《商品销售明细表》所有字段，另外增加交易卡号、商户订单号、卡别、交易货币类型。</p>
         <p class="modal-section-title">（3）交互设计</p>
-        <p>当选择 C01-1、C06 或 C07 时，数据范围由月度数据与所选日期范围内的数据共同组成。</p>
-        <p>-- 月度数据：按销售日期所属完成月汇总；若所选月份为当前月，则该部分取截止到本月前一天的数据。</p>
-        <p>--特殊说明：C01和C05规则内部存在“或”的关联关系，现拆分为两条独立规则，规则ID分别命名为 C01-1 和 C01-2，C05-1和C05-2，在报表中分开展示。</p>
+        <p>当选择C01、C06、C07时，会新增一个【销售月份】字段，表示该规则适用于月度数据。</p>
+        <p>当用户所选的规则不含以上规则，则使用【销售日期】字段。</p>
       </div>
     </div>
   </div>
@@ -962,41 +1092,39 @@
       '[7222]中免集团（北京）免税品有限公司'
     ];
 
+    const channelCatalog = ['机场渠道', '市内渠道', '口岸渠道', '离岛渠道'];
+    const storeChannelMap = Object.fromEntries(storeCatalog.map((store, index) => [store, channelCatalog[index % channelCatalog.length]]));
+
     const ruleCatalog = [
-      { id: 'C01-1', name: '同一证件高频购买次数（月）', content: '同一证件号购买相同商品编码次数≥3次/月', threshold: '购买次数：≥3次/月', level: '中' },
-      { id: 'C01-2', name: '同一证件高频购买订单数', content: '单日订单数≥4笔', threshold: '单日订单数：≥4笔', level: '中' },
-      { id: 'C02', name: '护照、身份信息相同，顾客姓名不同', content: '所选时间窗口内，同一证件身份信息存在不同顾客姓名≥2笔', threshold: '顾客姓名：≥2个', level: '中低' },
-      { id: 'C03', name: '购买时间异常', content: '同一旅客连续两笔交易购买时间间隔≥6小时且≤48小时', threshold: '最小间隔时间：≥6小时；最大间隔时间：≤48小时', level: '高' },
-      { id: 'C04', name: '支付人与证件人不一致', content: '在所选时间窗口内同一交易卡号为≥3个不同“证件号+顾客姓名”的订单付款', threshold: '证件号：≥3个；顾客姓名：≥3个', level: '高' },
-      { id: 'C05-1', name: '大额现金结算-单笔金额', content: '单笔订单现金支付金额≥5000元', threshold: '单笔金额：≥5000元', level: '中高' },
-      { id: 'C05-2', name: '大额现金结算-现金笔数占比', content: '同一收银员日现金结算笔数占比≥30%', threshold: '现金笔数占比：≥30%', level: '中高' },
-      { id: 'C06', name: '退货频率异常（笔数）', content: '统计数据月份的总退货笔数≥倒退一年内的月平均退货笔数*1.25', threshold: '比例：25%', level: '中高' },
-      { id: 'C07', name: '退货频率异常（金额）', content: '统计数据月份的总退货金额≥倒退一年内的月平均退货金额*1.05', threshold: '比例：5%', level: '中高' },
-      { id: 'C08', name: '低于成本销售', content: '成交金额＜含税成本', threshold: '成交金额<含税成本', level: '高' },
-      { id: 'C09', name: '临时折扣超权限', content: '临时折扣/售价≥25%', threshold: '25%', level: '中高' }
+      { id: 'C01', name: '同一证件高频购买', content: '同一证件号30天内购买相同商品编码次数≥3次，或单日订单数≥5笔', threshold: '购买次数：≥3次/30天；单日订单数：≥5笔', level: '中风险' },
+      { id: 'C02', name: '护照、身份信息相同，顾客姓名不同', content: '同一护照身份信息存在不同顾客姓名，≥2笔', threshold: '≥2次', level: '中低风险' },
+      { id: 'C03', name: '购买时间异常', content: '同一旅客连续离境/入境购物时间存在逻辑错误，两笔订单间隔购买时间≥6小时且≤48小时', threshold: '≥1次', level: '高风险' },
+      { id: 'C04', name: '支付人与证件人不一致', content: '同一支付账号为≥3个不同“证件号+顾客姓名”组合的订单付款', threshold: '3个组合', level: '高风险' },
+      { id: 'C05', name: '大额现金结算', content: '单笔订单现金支付金额≥5000元，或同一收银员日现金结算笔数占比＞30%', threshold: '5000元；30%', level: '中风险' },
+      { id: 'C06', name: '退货频率异常（笔数）', content: '统计数据月份的总退货笔数≥倒退一年内的月平均退货笔数*1.25', threshold: '5%', level: '中风险' },
+      { id: 'C07', name: '退货频率异常（金额）', content: '统计数据月份的总退货金额≥倒退一年内的月平均退货金额*1.05', threshold: '5%', level: '中风险' },
+      { id: 'C08', name: '低于成本销售', content: '交易价格＜含税成本', threshold: '交易价格<含税成本', level: '中风险' },
+      { id: 'C09', name: '临时折扣超权限', content: '临时折扣/售价 大于等于 25%', threshold: '25%', level: '中风险' }
     ];
 
     const summaryProfiles = [
-      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01-1', actual: '所选日期的月份内同证件号同商品4次', hits: 18, members: 6, items: 8, amount: 28680 },
-      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01-2', actual: '单日订单6笔', hits: 12, members: 6, items: 6, amount: 16840 },
+      { date: '2026-05-14', store: storeCatalog[0], ruleId: 'C01', actual: '30天内同证件同商品4次，单日订单6笔', hits: 18, members: 6, items: 8, amount: 28680 },
       { date: '2026-05-14', store: storeCatalog[1], ruleId: 'C02', actual: '同护照信息对应3个顾客姓名', hits: 3, members: 3, items: 4, amount: 7640 },
       { date: '2026-05-14', store: storeCatalog[2], ruleId: 'C03', actual: '两笔订单间隔8小时20分钟', hits: 2, members: 2, items: 3, amount: 5160 },
       { date: '2026-05-14', store: storeCatalog[3], ruleId: 'C04', actual: '同支付账号关联4个证件号+顾客姓名组合', hits: 4, members: 4, items: 6, amount: 18890 },
-      { date: '2026-05-14', store: storeCatalog[4], ruleId: 'C05-1', actual: '单笔现金支付6,800元', hits: 5, members: 5, items: 7, amount: 39200 },
+      { date: '2026-05-14', store: storeCatalog[4], ruleId: 'C05', actual: '单笔现金支付6,800元', hits: 5, members: 5, items: 7, amount: 39200 },
       { date: '2026-05-14', store: storeCatalog[5], ruleId: 'C06', actual: '当月退货笔数为均值的1.32倍', hits: 11, members: 9, items: 12, amount: 12680 },
       { date: '2026-05-14', store: storeCatalog[6], ruleId: 'C07', actual: '当月退货金额为均值的1.12倍', hits: 7, members: 6, items: 8, amount: 45890 },
       { date: '2026-05-14', store: storeCatalog[7], ruleId: 'C08', actual: '交易价格较含税成本低120元', hits: 6, members: 6, items: 6, amount: 9820 },
       { date: '2026-05-14', store: storeCatalog[8], ruleId: 'C09', actual: '临时折扣率32%', hits: 8, members: 8, items: 10, amount: 17640 },
-      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01-1', actual: '所选日期的月份内同证件号同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
-      { date: '2026-05-13', store: storeCatalog[13], ruleId: 'C05-2', actual: '收银员日现金结算笔数占比34%', hits: 6, members: 6, items: 6, amount: 31200 }
+      { date: '2026-05-13', store: storeCatalog[12], ruleId: 'C01', actual: '30天内同证件同商品3次', hits: 9, members: 4, items: 5, amount: 14220 },
+      { date: '2026-05-13', store: storeCatalog[13], ruleId: 'C05', actual: '收银员日现金结算笔数占比34%', hits: 6, members: 6, items: 6, amount: 31200 }
     ];
 
     const detailProfileTemplates = {
-      'C01-1': [
-        { time: '10:12:35', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '所选日期的月份内同证件号同商品4次', deviation: '+1次', desc: '按销售日期的完成月汇总，同一证件号同商品购买次数超过阈值' }
-      ],
-      'C01-2': [
-        { time: '11:24:08', pos: 'POS-03', cashier: '李某', cert: 'ID4601********1234', sku: 'SKU-C01-002', product: '香化套装A', pay: '支付宝', saleAmount: 1680, paidAmount: 1680, actual: '单日订单6笔', deviation: '+2笔', desc: '同一证件单日订单数超过阈值' }
+      C01: [
+        { time: '10:12:35', pos: 'POS-01', cashier: '王某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '银行卡', saleAmount: 1560, paidAmount: 1560, actual: '30天内同证件同商品4次', deviation: '+1次', desc: '同一证件30天内高频购买相同商品' },
+        { time: '11:24:08', pos: 'POS-03', cashier: '李某', cert: 'ID4601********1234', sku: 'SKU-C01-001', product: '香化套装A', pay: '支付宝', saleAmount: 1680, paidAmount: 1680, actual: '单日订单6笔', deviation: '+1笔', desc: '同一证件单日订单数超过阈值' }
       ],
       C02: [
         { time: '09:40:19', pos: 'POS-02', cashier: '赵某', cert: 'P1234****88', sku: 'SKU-C02-001', product: '精品商品B', pay: '微信', saleAmount: 2380, paidAmount: 2380, actual: '同护照信息对应3个顾客姓名', deviation: '+1次', desc: '护照、身份信息相同但顾客姓名不同' }
@@ -1007,12 +1135,9 @@
       C04: [
         { time: '16:02:27', pos: 'POS-04', cashier: '周某', cert: 'ID2102********5512', sku: 'SKU-C04-001', product: '酒水商品D', pay: '同一支付账号', saleAmount: 4890, paidAmount: 4890, actual: '同支付账号关联4个证件号+顾客姓名组合', deviation: '+1个组合', desc: '支付人与证件人存在不一致风险' }
       ],
-      'C05-1': [
+      C05: [
         { time: '13:46:50', pos: 'POS-01', cashier: '吴某', cert: 'ID2311********9088', sku: 'SKU-C05-001', product: '腕表商品E', pay: '现金', saleAmount: 6800, paidAmount: 6800, actual: '单笔现金支付6,800元', deviation: '+1,800元', desc: '大额现金结算超过单笔标准' },
         { time: '12:01:46', pos: 'POS-01', cashier: '曹某', cert: 'ID5301********4418', sku: 'SKU-C05-002', product: '精品商品N', pay: '现金', saleAmount: 5200, paidAmount: 5200, actual: '单笔现金支付5,200元', deviation: '+200元', desc: '大额现金结算超过单笔标准' }
-      ],
-      'C05-2': [
-        { time: '17:18:26', pos: 'POS-08', cashier: '曹某', cert: 'ID5301********4418', sku: 'SKU-C05-003', product: '精品商品N', pay: '现金', saleAmount: 1880, paidAmount: 1880, actual: '收银员日现金结算笔数占比34%', deviation: '+4%', desc: '现金结算笔数占比超过阈值' }
       ],
       C06: [
         { time: '18:12:21', pos: 'POS-05', cashier: '郑某', cert: 'ID1507********6610', sku: 'SKU-C06-001', product: '退货商品F', pay: '原路退回', saleAmount: -860, paidAmount: -860, actual: '当月退货笔数为均值的1.32倍', deviation: '+0.07倍', desc: '退货笔数频率高于历史均值阈值' }
@@ -1028,7 +1153,7 @@
       ]
     };
 
-    const monthFilterRuleIds = ['C01-1', 'C06', 'C07'];
+    const monthFilterRuleIds = ['C01', 'C06', 'C07'];
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
     const allRuleLabels = ruleCatalog.map(rule => `${rule.id} ${rule.name}`);
@@ -1038,6 +1163,7 @@
 
       id: index + 1,
       ...item,
+      channel: storeChannelMap[item.store] || '其他渠道',
       ruleName: ruleMap[item.ruleId].name,
       ruleContent: ruleMap[item.ruleId].content,
       threshold: ruleMap[item.ruleId].threshold,
@@ -1052,6 +1178,7 @@
           id: `${summary.ruleId}-${summary.date}-${index + 1}`,
           date: summary.date,
           store: summary.store,
+          channel: storeChannelMap[summary.store] || '其他渠道',
           ruleId: summary.ruleId,
           receipt: `${summary.ruleId}${summary.date.replace(/-/g, '')}${String(index + 1).padStart(4, '0')}`,
           ...template,
@@ -1064,10 +1191,13 @@
     });
 
     const state = {
+      channels: [...channelCatalog],
       stores: [...storeCatalog],
       ruleIds: [...allRuleIds],
       startDate: '2026-05-01',
       endDate: '2026-05-14',
+      salesMonthStart: '2026-05',
+      salesMonthEnd: '2026-05',
       selectedSummary: null,
       summarySortKey: '',
       summarySortDirection: 'asc'
@@ -1076,6 +1206,7 @@
     const $ = selector => document.querySelector(selector);
     const $$ = selector => Array.from(document.querySelectorAll(selector));
     const formatNumber = value => Number(value).toLocaleString('zh-CN', { maximumFractionDigits: 0 });
+    const formatRiskValue = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: Number(value) % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
     const formatMoney = value => Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const escapeHtml = value => String(value).replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
 
@@ -1100,8 +1231,26 @@
       return new Set(state.ruleIds);
     }
 
+    function getSelectedChannels() {
+      return state.channels.length === channelCatalog.length ? [] : state.channels;
+    }
+
     function getSelectedStores() {
       return state.stores.length === storeCatalog.length ? [] : state.stores;
+    }
+
+    function shouldShowSalesMonthField() {
+      return state.ruleIds.some(ruleId => monthFilterRuleIds.includes(ruleId));
+    }
+
+    function salesMonthInRange(item) {
+      if (!monthFilterRuleIds.includes(item.ruleId)) return true;
+      const itemMonth = item.date.slice(0, 7);
+      return itemMonth >= state.salesMonthStart && itemMonth <= state.salesMonthEnd;
+    }
+
+    function updateSalesMonthFieldVisibility() {
+      $('#salesMonthField').classList.toggle('hidden', !shouldShowSalesMonthField());
     }
 
     function inDateRange(item) {
@@ -1109,12 +1258,14 @@
     }
 
     function applyFilters(data) {
+      const selectedChannels = getSelectedChannels();
       const selectedStores = getSelectedStores();
       const ruleIds = selectedRuleSet();
       return data.filter(item => {
+        const channelOk = selectedChannels.length === 0 || selectedChannels.includes(item.channel);
         const storeOk = selectedStores.length === 0 || selectedStores.includes(item.store);
         const ruleIdOk = ruleIds.has(item.ruleId);
-        return inDateRange(item) && storeOk && ruleIdOk;
+        return inDateRange(item) && channelOk && storeOk && ruleIdOk && salesMonthInRange(item);
       });
     }
 
@@ -1143,6 +1294,68 @@
       return sortSummaryRows(applyFilters(summaryData));
     }
 
+    function getStatisticInterval() {
+      return `${state.startDate} 至 ${state.endDate}`;
+    }
+
+    function getStatisticMonths(rows) {
+      return [...new Set(rows.map(row => row.date.slice(0, 7)))].sort();
+    }
+
+    function riskScoreCoefficient(ruleId) {
+      const level = ruleMap[ruleId]?.level || '';
+      if (level.includes('高') && !level.includes('低')) return 0.22;
+      if (level.includes('中')) return 0.16;
+      return 0.1;
+    }
+
+    function calculateSingleRiskValue(row) {
+      return row.hits * riskScoreCoefficient(row.ruleId);
+    }
+
+    function assignWarningLevels(rows) {
+      const sorted = [...rows].sort((left, right) => right.riskValue - left.riskValue || left.store.localeCompare(right.store, 'zh-CN'));
+      const count = sorted.length;
+      if (!count) return [];
+      return sorted.map((row, index) => {
+        const rankRatio = Math.floor((index * 4) / count);
+        const warningLevel = ['非常高', '高', '中等', '低'][Math.min(rankRatio, 3)];
+        return { ...row, warningLevel };
+      });
+    }
+
+    function getDashboardRows() {
+      const sourceRows = applyFilters(summaryData);
+      const grouped = new Map();
+      sourceRows.forEach(row => {
+        const current = grouped.get(row.store) || {
+          interval: getStatisticInterval(),
+          months: new Set(),
+          store: row.store,
+          rawRiskValue: 0
+        };
+        current.months.add(row.date.slice(0, 7));
+        current.rawRiskValue += calculateSingleRiskValue(row);
+        grouped.set(row.store, current);
+      });
+
+      const groupedRows = Array.from(grouped.values());
+      const maxRawRiskValue = Math.max(...groupedRows.map(row => row.rawRiskValue), 0);
+      const normalizedRows = groupedRows.map(row => ({
+        ...row,
+        months: [...row.months].sort(),
+        riskValue: maxRawRiskValue ? Math.min(5, Number(((row.rawRiskValue / maxRawRiskValue) * 5).toFixed(2))) : 0
+      }));
+      return assignWarningLevels(normalizedRows);
+    }
+
+    function warningLevelClass(level) {
+      if (level === '非常高') return 'warn-very-high';
+      if (level === '高') return 'warn-high';
+      if (level === '中等') return 'warn-medium';
+      return 'warn-low';
+    }
+
     function getDetailRows() {
       let rows = applyFilters(detailData);
       if (state.selectedSummary) {
@@ -1151,9 +1364,28 @@
       return rows;
     }
 
-    function renderMetrics(summaryRows, detailRows) {
+    function renderMetrics(dashboardRows, summaryRows, detailRows) {
+      $('#dashboardBadge').textContent = dashboardRows.length;
       $('#summaryBadge').textContent = summaryRows.length;
       $('#detailBadge').textContent = detailRows.length;
+    }
+
+    function renderDashboard() {
+      const rows = getDashboardRows();
+      const body = $('#dashboardBody');
+      body.innerHTML = rows.map((row, index) => `
+        <tr>
+          <td class="center">${index + 1}</td>
+          <td>${escapeHtml(row.interval)}</td>
+          <td>${escapeHtml(row.store)}</td>
+          <td class="num">${formatRiskValue(row.riskValue)}</td>
+          <td><span class="tag ${warningLevelClass(row.warningLevel)}">${row.warningLevel}</span></td>
+        </tr>
+      `).join('');
+
+      $('#dashboardEmpty').classList.toggle('show', rows.length === 0);
+      $('#dashboardTable').style.display = rows.length ? 'table' : 'none';
+      $('#dashboardFooter').textContent = `共 ${rows.length} 条看板记录`;
     }
 
     function renderSummary() {
@@ -1162,7 +1394,6 @@
       body.innerHTML = rows.map((row, index) => `
         <tr class="${state.selectedSummary && state.selectedSummary.id === row.id ? 'selected' : ''}" data-id="${row.id}">
           <td class="center">${index + 1}</td>
-          <td>${row.date}</td>
           <td>${escapeHtml(row.store)}</td>
           <td>${row.ruleId}</td>
           <td>${escapeHtml(row.ruleName)}</td>
@@ -1257,6 +1488,66 @@
       return values[field] ?? '-';
     }
 
+    function renderRiskBarChart(rows) {
+      const svg = $('#riskBarChart');
+      const empty = $('#riskChartEmpty');
+      const chartRows = [...rows].sort((left, right) => right.riskValue - left.riskValue).slice(0, 12);
+      const hasData = chartRows.length > 0;
+      empty.classList.toggle('show', !hasData);
+      svg.style.display = hasData ? 'block' : 'none';
+      if (!hasData) {
+        svg.innerHTML = '';
+        $('#chartTip').textContent = '按销售日期月份统计，横轴为门店，纵轴为风险值汇总';
+        return;
+      }
+
+      const monthText = [...new Set(chartRows.flatMap(row => row.months))].join('、') || state.startDate.slice(0, 7);
+      $('#chartTip').textContent = `统计月份：${monthText}；横轴为门店，纵轴为风险值汇总（0—5）`;
+      const colorMap = { '非常高': '#ff0b0b', '高': '#ffc000', '中等': '#ffff00', '低': '#12b5dc' };
+      const width = 1000;
+      const height = 300;
+      const margin = { top: 24, right: 24, bottom: 78, left: 54 };
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+      const maxValue = 5;
+      const barGap = 14;
+      const barWidth = Math.max(28, (innerWidth - barGap * (chartRows.length - 1)) / chartRows.length);
+      const ticks = [0, 1, 2, 3, 4, 5];
+
+      const gridLines = ticks.map(tick => {
+        const y = margin.top + innerHeight - (tick / maxValue) * innerHeight;
+        return `
+          <line x1="${margin.left}" y1="${y}" x2="${width - margin.right}" y2="${y}" stroke="#edf1f7" />
+          <text x="${margin.left - 10}" y="${y + 4}" text-anchor="end" fill="#7a8ba0" font-size="11">${tick}</text>
+        `;
+      }).join('');
+
+      const bars = chartRows.map((row, index) => {
+        const x = margin.left + index * (barWidth + barGap);
+        const barHeight = Math.round((row.riskValue / maxValue) * innerHeight);
+        const y = margin.top + innerHeight - barHeight;
+        const color = colorMap[row.warningLevel] || colorMap['低'];
+        return `
+          <g>
+            <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="6" fill="${color}" stroke="rgba(31,45,61,0.12)">
+              <title>${escapeHtml(row.interval)}｜${escapeHtml(row.store)}｜风险值汇总：${formatRiskValue(row.riskValue)}｜预警等级：${row.warningLevel}</title>
+            </rect>
+            <text x="${x + barWidth / 2}" y="${Math.max(14, y - 7)}" text-anchor="middle" fill="#34465c" font-size="12" font-weight="700">${formatRiskValue(row.riskValue)}</text>
+            <text x="${x + barWidth / 2}" y="${height - 42}" text-anchor="middle" fill="#5f6f85" font-size="11">${extractStoreCode(row.store)}</text>
+          </g>
+        `;
+      }).join('');
+
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.innerHTML = `
+        ${gridLines}
+        <line x1="${margin.left}" y1="${margin.top + innerHeight}" x2="${width - margin.right}" y2="${margin.top + innerHeight}" stroke="#d8dee9" />
+        <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + innerHeight}" stroke="#d8dee9" />
+        ${bars}
+        <text x="${margin.left}" y="${height - 12}" fill="#7a8ba0" font-size="12">横轴：门店；纵轴：风险值汇总</text>
+      `;
+    }
+
     function renderDetail() {
       const rows = getDetailRows();
       const fields = detailFields;
@@ -1275,16 +1566,32 @@
     }
 
     function render() {
+      const dashboardRows = getDashboardRows();
       const summaryRows = getSummaryRows();
       const detailRows = getDetailRows();
+      renderDashboard();
       renderSummary();
       renderDetail();
-      renderMetrics(summaryRows, detailRows);
+      renderRiskBarChart(dashboardRows);
+      renderMetrics(dashboardRows, summaryRows, detailRows);
     }
 
     function switchTab(panelId) {
       $$('.inner-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tab === panelId));
       $$('.tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === panelId));
+    }
+
+    function syncChannelChip() {
+      const chip = $('#channelChip');
+      if (state.channels.length === channelCatalog.length) {
+        chip.textContent = '全部渠道';
+      } else if (state.channels.length === 1) {
+        chip.textContent = state.channels[0];
+      } else if (state.channels.length === 0) {
+        chip.textContent = '未选择渠道';
+      } else {
+        chip.textContent = `已选 ${state.channels.length} 个渠道`;
+      }
     }
 
     function syncStoreChip() {
@@ -1312,6 +1619,22 @@
       } else {
         chip.textContent = `已选 ${state.ruleIds.length} 个规则`;
       }
+    }
+
+    function renderChannelOptions() {
+      $('#channelOptions').innerHTML = [
+        `<label class="option"><input type="checkbox" value="全部渠道" checked /><span>全部渠道</span></label>`,
+        ...channelCatalog.map(channel => `<label class="option"><input type="checkbox" value="${escapeHtml(channel)}" checked /><span>${escapeHtml(channel)}</span></label>`)
+      ].join('');
+    }
+
+    function syncChannelCheckboxes() {
+      const selected = new Set(state.channels);
+      const isAllSelected = state.channels.length === channelCatalog.length;
+      $$('#channelDropdown input[type="checkbox"]').forEach(input => {
+        input.checked = input.value === '全部渠道' ? isAllSelected : selected.has(input.value);
+      });
+      syncChannelChip();
     }
 
     function renderStoreOptions() {
@@ -1345,6 +1668,7 @@
         input.checked = input.value === '全部规则' ? state.ruleIds.length === allRuleIds.length : selected.has(input.value);
       });
       syncRuleChip();
+      updateSalesMonthFieldVisibility();
     }
 
     function bindDropdown(dropdownId, triggerId) {
@@ -1379,6 +1703,7 @@
 
     function bindEvents() {
       $$('.inner-tab').forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+      bindDropdown('#channelDropdown', '#channelTrigger');
       bindDropdown('#storeDropdown', '#storeTrigger');
       bindDropdown('#ruleDropdown', '#ruleTrigger');
       document.addEventListener('click', () => $$('.dropdown').forEach(item => item.classList.remove('open')));
@@ -1393,6 +1718,20 @@
             state.summarySortDirection = 'asc';
           }
           renderSummary();
+        });
+      });
+
+      $$('#channelDropdown input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', () => {
+          if (input.value === '全部渠道') {
+            state.channels = input.checked ? [...channelCatalog] : [];
+          } else {
+            const selected = new Set(state.channels);
+            if (input.checked) selected.add(input.value);
+            else selected.delete(input.value);
+            state.channels = channelCatalog.filter(channel => selected.has(channel));
+          }
+          syncChannelCheckboxes();
         });
       });
 
@@ -1412,6 +1751,13 @@
 
       bindRuleCheckboxEvents();
 
+      $('#channelSearch').addEventListener('input', event => {
+        const keyword = event.target.value.trim();
+        $$('#channelDropdown .option').forEach(option => {
+          option.style.display = option.textContent.includes(keyword) ? 'flex' : 'none';
+        });
+      });
+
       $('#storeSearch').addEventListener('input', event => {
         const keyword = event.target.value.trim();
         $$('#storeDropdown .option').forEach(option => {
@@ -1429,6 +1775,8 @@
       $('#queryBtn').addEventListener('click', () => {
         state.startDate = $('#startDate').value;
         state.endDate = $('#endDate').value;
+        state.salesMonthStart = $('#salesMonthStart').value;
+        state.salesMonthEnd = $('#salesMonthEnd').value;
         state.selectedSummary = null;
         $('#detailTip').textContent = '展示当前筛选条件下的销售业务指标明细';
         render();
@@ -1438,16 +1786,22 @@
       $('#resetBtn').addEventListener('click', () => {
         $('#startDate').value = '2026-05-01';
         $('#endDate').value = '2026-05-14';
+        $('#salesMonthStart').value = '2026-05';
+        $('#salesMonthEnd').value = '2026-05';
         Object.assign(state, {
+          channels: [...channelCatalog],
           stores: [...storeCatalog],
           ruleIds: [...allRuleIds],
           startDate: '2026-05-01',
           endDate: '2026-05-14',
+          salesMonthStart: '2026-05',
+          salesMonthEnd: '2026-05',
           selectedSummary: null,
           summarySortKey: '',
           summarySortDirection: 'asc'
         });
-        syncStoreChip();
+        syncChannelCheckboxes();
+        syncStoreCheckboxes();
         syncRuleCheckboxes();
         $('#detailTip').textContent = '展示当前筛选条件下的销售业务指标明细';
         render();
@@ -1487,9 +1841,11 @@
       });
     }
 
+    renderChannelOptions();
     renderStoreOptions();
     renderRuleOptions();
     bindEvents();
+    syncChannelCheckboxes();
     syncStoreCheckboxes();
     syncRuleCheckboxes();
     render();
