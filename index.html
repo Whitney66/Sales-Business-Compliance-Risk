@@ -938,7 +938,7 @@
     <section class="panel chart-panel">
       <div class="panel-header">
         <div class="panel-title">门店风险值汇总柱形图</div>
-        <div class="panel-tip" id="chartTip">按销售日期月份统计，横轴为门店，纵轴为风险值汇总</div>
+        <div class="panel-tip" id="chartTip">按筛选条件统计门店风险值汇总</div>
       </div>
       <div class="risk-chart" id="riskChart">
         <div class="risk-chart-empty" id="riskChartEmpty">暂无图表数据</div>
@@ -1497,12 +1497,11 @@
       svg.style.display = hasData ? 'block' : 'none';
       if (!hasData) {
         svg.innerHTML = '';
-        $('#chartTip').textContent = '按销售日期月份统计，横轴为门店，纵轴为风险值汇总';
+        $('#chartTip').textContent = '按筛选条件统计门店风险值汇总';
         return;
       }
 
-      const monthText = [...new Set(chartRows.flatMap(row => row.months))].join('、') || state.startDate.slice(0, 7);
-      $('#chartTip').textContent = `统计月份：${monthText}；横轴为门店，纵轴为风险值汇总（0—5）`;
+      $('#chartTip').textContent = '按筛选条件统计门店风险值汇总';
       const colorMap = { '非常高': '#ff0b0b', '高': '#ffc000', '中等': '#ffff00', '低': '#12b5dc' };
       const width = 1000;
       const height = 300;
@@ -1544,7 +1543,8 @@
         <line x1="${margin.left}" y1="${margin.top + innerHeight}" x2="${width - margin.right}" y2="${margin.top + innerHeight}" stroke="#d8dee9" />
         <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + innerHeight}" stroke="#d8dee9" />
         ${bars}
-        <text x="${margin.left}" y="${height - 12}" fill="#7a8ba0" font-size="12">横轴：门店；纵轴：风险值汇总</text>
+        <text x="${margin.left - 38}" y="${margin.top + innerHeight / 2}" fill="#5f6f85" font-size="12" text-anchor="middle" transform="rotate(-90 ${margin.left - 38} ${margin.top + innerHeight / 2})">纵轴：风险值汇总</text>
+        <text x="${margin.left + innerWidth / 2}" y="${height - 12}" fill="#5f6f85" font-size="12" text-anchor="middle">横轴：门店</text>
       `;
     }
 
