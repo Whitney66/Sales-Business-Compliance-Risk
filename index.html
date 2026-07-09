@@ -916,15 +916,6 @@
           </div>
         </div>
 
-        <div class="field hidden" id="salesMonthField">
-          <label>销售月份</label>
-          <div class="date-range">
-            <input class="date-input" id="salesMonthStart" type="month" value="2026-05" />
-            <span>至</span>
-            <input class="date-input" id="salesMonthEnd" type="month" value="2026-05" />
-          </div>
-        </div>
-
         <div class="btn-group">
           <button class="btn primary" id="queryBtn">查询</button>
           <button class="btn" id="resetBtn">重置</button>
@@ -1058,8 +1049,7 @@
         <p class="modal-section-title">（2）明细：基于门店粒度下钻至该门店的异常明细信息</p>
         <p>明细包含《商品销售明细表》所有字段，另外增加交易卡号、商户订单号、卡别、交易货币类型。</p>
         <p class="modal-section-title">（3）交互设计</p>
-        <p>当选择C01、C06、C07时，会新增一个【销售月份】字段，表示该规则适用于月度数据。</p>
-        <p>当用户所选的规则不含以上规则，则使用【销售日期】字段。</p>
+        <p>筛选项统一使用【销售日期】、【渠道】、【门店】、【规则】，看板、柱形图、汇总、明细保持联动。</p>
       </div>
     </div>
   </div>
@@ -1153,7 +1143,6 @@
       ]
     };
 
-    const monthFilterRuleIds = ['C01', 'C06', 'C07'];
     const ruleMap = Object.fromEntries(ruleCatalog.map(rule => [rule.id, rule]));
     const allRuleIds = ruleCatalog.map(rule => rule.id);
     const allRuleLabels = ruleCatalog.map(rule => `${rule.id} ${rule.name}`);
@@ -1196,8 +1185,6 @@
       ruleIds: [...allRuleIds],
       startDate: '2026-05-01',
       endDate: '2026-05-14',
-      salesMonthStart: '2026-05',
-      salesMonthEnd: '2026-05',
       selectedSummary: null,
       summarySortKey: '',
       summarySortDirection: 'asc'
@@ -1239,20 +1226,6 @@
       return state.stores.length === storeCatalog.length ? [] : state.stores;
     }
 
-    function shouldShowSalesMonthField() {
-      return state.ruleIds.some(ruleId => monthFilterRuleIds.includes(ruleId));
-    }
-
-    function salesMonthInRange(item) {
-      if (!monthFilterRuleIds.includes(item.ruleId)) return true;
-      const itemMonth = item.date.slice(0, 7);
-      return itemMonth >= state.salesMonthStart && itemMonth <= state.salesMonthEnd;
-    }
-
-    function updateSalesMonthFieldVisibility() {
-      $('#salesMonthField').classList.toggle('hidden', !shouldShowSalesMonthField());
-    }
-
     function inDateRange(item) {
       return item.date >= state.startDate && item.date <= state.endDate;
     }
@@ -1265,7 +1238,7 @@
         const channelOk = selectedChannels.length === 0 || selectedChannels.includes(item.channel);
         const storeOk = selectedStores.length === 0 || selectedStores.includes(item.store);
         const ruleIdOk = ruleIds.has(item.ruleId);
-        return inDateRange(item) && channelOk && storeOk && ruleIdOk && salesMonthInRange(item);
+        return inDateRange(item) && channelOk && storeOk && ruleIdOk;
       });
     }
 
@@ -1668,7 +1641,6 @@
         input.checked = input.value === '全部规则' ? state.ruleIds.length === allRuleIds.length : selected.has(input.value);
       });
       syncRuleChip();
-      updateSalesMonthFieldVisibility();
     }
 
     function bindDropdown(dropdownId, triggerId) {
@@ -1775,8 +1747,6 @@
       $('#queryBtn').addEventListener('click', () => {
         state.startDate = $('#startDate').value;
         state.endDate = $('#endDate').value;
-        state.salesMonthStart = $('#salesMonthStart').value;
-        state.salesMonthEnd = $('#salesMonthEnd').value;
         state.selectedSummary = null;
         $('#detailTip').textContent = '展示当前筛选条件下的销售业务指标明细';
         render();
@@ -1786,16 +1756,12 @@
       $('#resetBtn').addEventListener('click', () => {
         $('#startDate').value = '2026-05-01';
         $('#endDate').value = '2026-05-14';
-        $('#salesMonthStart').value = '2026-05';
-        $('#salesMonthEnd').value = '2026-05';
         Object.assign(state, {
           channels: [...channelCatalog],
           stores: [...storeCatalog],
           ruleIds: [...allRuleIds],
           startDate: '2026-05-01',
           endDate: '2026-05-14',
-          salesMonthStart: '2026-05',
-          salesMonthEnd: '2026-05',
           selectedSummary: null,
           summarySortKey: '',
           summarySortDirection: 'asc'
